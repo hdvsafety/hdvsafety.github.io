@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Truck–Excavator Loading: Communication Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef0ea; --sheet:#f8f9f5; --sheet-2:#e3e6dd; --ink:#1b232b; --ink-2:#3d4852; --muted:#66717b; --rule:#c9cec3;
+  --hivis:#f4c20d; --hivis-ink:#1b232b; --red:#cf2f2b; --red-soft:rgba(207,47,43,.10); --green:#1e8a52; --blue:#2366b5; --violet:#6b4bb0; --amber:#b86e00;
+  --ground:#d8d3c2; --ground-line:#cbc5b1; --pit:#8f7350; --pit-dark:#6f573b; --road:#b4ae9d; --road-edge:#9d977f;
+  --steel:#4a5560; --steel-2:#6c7884; --glass:#9fc4dc; --soil:#7b5a36;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141a1f; --sheet:#1b2229; --sheet-2:#232c34; --ink:#e8ebe4; --ink-2:#c3cad0; --muted:#8e99a3; --rule:#323c45;
+    --red:#ff5d55; --red-soft:rgba(255,93,85,.12); --green:#45c07f; --blue:#5ea2ff; --violet:#a58bf0; --amber:#f0a53a;
+    --ground:#2b2f2a; --ground-line:#343a33; --pit:#5b4733; --pit-dark:#463626; --road:#3d4039; --road-edge:#4c5047;
+    --steel:#8996a3; --steel-2:#a9b4be; --glass:#4f7c99; --soil:#8a6840;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141a1f; --sheet:#1b2229; --sheet-2:#232c34; --ink:#e8ebe4; --ink-2:#c3cad0; --muted:#8e99a3; --rule:#323c45;
+  --red:#ff5d55; --red-soft:rgba(255,93,85,.12); --green:#45c07f; --blue:#5ea2ff; --violet:#a58bf0; --amber:#f0a53a;
+  --ground:#2b2f2a; --ground-line:#343a33; --pit:#5b4733; --pit-dark:#463626; --road:#3d4039; --road-edge:#4c5047;
+  --steel:#8996a3; --steel-2:#a9b4be; --glass:#4f7c99; --soil:#8a6840;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px); -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.55}
+img,svg{max-width:100%}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--hivis); outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--display); line-height:1.08; margin:0; letter-spacing:.005em}
+h2{font-size:clamp(1.9rem,4vw,2.6rem); font-weight:700}
+h3{font-size:1.35rem; font-weight:600}
+p{margin:0 0 .8em}
+.wrap{max-width:1240px; margin:0 auto; padding:0 clamp(16px,3vw,32px)}
+.prose{max-width:68ch}
+
+/* Top bar */
+.topbar{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:#1b232b; color:#eef0ea; border-bottom:1px solid #323c45}
+.topbar::before{content:""; display:block; height:6px; background:repeating-linear-gradient(-45deg,var(--hivis) 0 14px,#1b232b 14px 28px)}
+.topbar .wrap{display:flex; align-items:center; gap:20px; min-height:52px}
+.brand{font-family:var(--display); font-weight:700; font-size:1.15rem; white-space:nowrap}
+.nav{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:inherit; opacity:.82; text-decoration:none; font-family:var(--display); font-weight:600; font-size:1rem; padding:8px 10px; border-radius:3px; white-space:nowrap}
+.nav a:hover{opacity:1; background:rgba(255,255,255,.08)}
+@media (max-width:720px){.brand{display:none} .nav{margin-left:0}}
+
+/* Hero */
+.hero{padding:clamp(28px,5vw,52px) 0 18px}
+.hero h1{font-size:clamp(2.3rem,5.4vw,4rem); font-weight:700; max-width:22ch}
+.hero .lede{font-size:1.15rem; color:var(--ink-2); max-width:62ch; margin-top:14px}
+.scope{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:16px; color:var(--muted); font-size:.95rem}
+.scope b{color:var(--ink); font-weight:600}
+
+/* Simulator */
+.sim{display:grid; grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr); gap:0; background:var(--sheet); border:1px solid var(--rule); margin-bottom:56px}
+@media (max-width:980px){.sim{grid-template-columns:1fr}}
+.stage{position:relative; min-width:0}
+@media (min-width:981px){.stage{position:sticky; top:calc(env(safe-area-inset-top,0px) + 58px); align-self:start}.panel{border-left:1px solid var(--rule)}}
+@media (max-width:980px){.stage{border-bottom:1px solid var(--rule)}}
+.stage-bar{display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; padding:12px 14px; border-bottom:1px solid var(--rule)}
+.seg{display:inline-flex; border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.seg button{font:600 .95rem var(--display); background:transparent; color:var(--ink-2); border:0; padding:7px 12px; cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.layers{display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.92rem; color:var(--ink-2)}
+.layers label{display:inline-flex; align-items:center; gap:6px; cursor:pointer}
+.layers input{accent-color:var(--ink); width:16px; height:16px}
+.scene{position:relative; width:100%; aspect-ratio:960/580}
+.scene svg{display:block; width:100%; height:100%}
+.bubbles{position:absolute; inset:0; pointer-events:none}
+.bubble{position:absolute; max-width:min(40%,250px); background:var(--sheet); color:var(--ink); border:2px solid var(--ink); border-radius:6px; padding:5px 8px; font-size:clamp(.72rem,1.3vw,.86rem); line-height:1.3; box-shadow:0 3px 0 rgba(0,0,0,.18); transition:opacity .3s}
+.bubble .m{display:block; font:600 .78em var(--display); color:var(--muted)}
+.bubble.k-radio{border-color:var(--blue)} .bubble.k-horn{border-color:var(--amber)} .bubble.k-hand{border-color:var(--green)} .bubble.k-alarm,.bubble.k-stop{border-color:var(--red)}
+.bubble.up{transform:translate(-50%,-100%)} .bubble.down{transform:translate(-50%,0)} .bubble.downl{transform:translate(0,0)} .bubble.downr{transform:translate(-100%,0)} .bubble.right{transform:translate(0,-50%)}
+@media (max-width:640px){.bubbles{display:none}}
+.estop-banner{position:absolute; left:0; right:0; top:0; background:var(--red); color:#fff; font:700 clamp(.95rem,1.8vw,1.2rem) var(--display); padding:7px 12px; display:none; align-items:center; gap:10px}
+.estop-banner.on{display:flex}
+.legend{display:flex; flex-wrap:wrap; gap:6px 18px; padding:10px 14px; border-top:1px solid var(--rule); font-size:.88rem; color:var(--ink-2)}
+.legend i{display:inline-block; width:14px; height:14px; vertical-align:-2px; margin-right:6px; border-radius:2px}
+
+.panel{display:flex; flex-direction:column; min-width:0}
+.steps-nav{display:grid; grid-template-columns:repeat(6,1fr); border-bottom:1px solid var(--rule)}
+.steps-nav button{font:700 1.05rem var(--display); background:transparent; border:0; border-right:1px solid var(--rule); color:var(--muted); padding:10px 0 8px; cursor:pointer; position:relative}
+.steps-nav button:last-child{border-right:0}
+.steps-nav button[aria-current="step"]{color:var(--ink); background:var(--hivis); color:var(--hivis-ink)}
+.steps-nav button.done{color:var(--ink)}
+.step-body{padding:16px 18px 6px; flex:1}
+.step-kicker{font:600 1rem var(--display); color:var(--muted)}
+.step-title{font-size:1.7rem; font-weight:700; margin:2px 0 8px}
+.step-desc{color:var(--ink-2); font-size:1rem}
+.comms{list-style:none; margin:12px 0; padding:0; display:grid; gap:8px}
+.comms li{display:grid; grid-template-columns:auto 1fr; gap:2px 10px; padding:8px 10px; background:var(--paper); border-left:4px solid var(--rule); font-size:.95rem}
+.comms .who{grid-column:1/-1; font:600 .9rem var(--display); color:var(--ink-2)}
+.comms .tag{font:700 .78rem var(--display); padding:2px 6px; border-radius:3px; align-self:start; color:#fff; white-space:nowrap}
+.comms .msg{min-width:0}
+.k-radio-b{border-left-color:var(--blue)!important} .t-radio{background:var(--blue)}
+.k-horn-b{border-left-color:var(--amber)!important} .t-horn{background:var(--amber)}
+.k-hand-b{border-left-color:var(--green)!important} .t-hand{background:var(--green)}
+.k-alarm-b{border-left-color:var(--red)!important} .t-alarm{background:var(--red)}
+.k-visual-b{border-left-color:var(--violet)!important} .t-visual{background:var(--violet)}
+.k-brief-b{border-left-color:var(--ink-2)!important} .t-brief{background:var(--ink-2)}
+.rules{margin:4px 0 10px; padding-left:20px; font-size:.95rem}
+.rules li{margin-bottom:4px}
+.rules li.no::marker{content:"✕  "; color:var(--red); font-weight:700}
+.rules li.yes::marker{content:"✓  "; color:var(--green); font-weight:700}
+.cites{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 14px}
+.cite{font:600 .85rem var(--display); border:1px solid var(--rule); padding:2px 7px; border-radius:3px; color:var(--ink-2); background:var(--sheet)}
+.controls{display:flex; gap:8px; padding:12px 18px 16px; border-top:1px solid var(--rule); flex-wrap:wrap}
+.btn{font:600 1rem var(--display); border:1.5px solid var(--ink); background:var(--sheet); color:var(--ink); padding:9px 14px; border-radius:4px; cursor:pointer; min-height:42px}
+.btn:hover{background:var(--sheet-2)}
+.btn.primary{background:var(--ink); color:var(--paper)}
+.btn.stop{background:var(--red); border-color:var(--red); color:#fff; margin-left:auto}
+.btn.stop.resume{background:var(--green); border-color:var(--green)}
+.btn:disabled{opacity:.4; cursor:default}
+
+/* Sections */
+section.block{padding:52px 0; border-top:1px solid var(--rule)}
+.block-head{display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin-bottom:26px}
+.block-head p{color:var(--ink-2); max-width:68ch; margin:0}
+
+/* Protocol */
+.proto{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:28px 40px}
+.golden{margin:0; padding:0; list-style:none; counter-reset:g}
+.golden li{padding:12px 0 12px 0; border-bottom:1px solid var(--rule); display:grid; grid-template-columns:2.2rem 1fr; gap:8px}
+.golden li::before{counter-increment:g; content:counter(g); font:700 1.6rem/1 var(--display); color:var(--red)}
+.golden b{display:block; font-family:var(--display); font-size:1.15rem; font-weight:600}
+.horn{width:100%; border-collapse:collapse; font-size:.98rem}
+.horn th,.horn td{text-align:left; padding:10px 8px; border-bottom:1px solid var(--rule); vertical-align:top}
+.horn th{font:600 .95rem var(--display); color:var(--muted)}
+.pips{display:inline-flex; gap:4px; align-items:center}
+.pips i{display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--amber)}
+.pips i.long{width:44px; border-radius:6px; background:var(--red)}
+.script{display:grid; gap:0; border:1px solid var(--rule); background:var(--sheet)}
+.script div{display:grid; grid-template-columns:7.2rem 1fr; gap:10px; padding:9px 12px; border-bottom:1px solid var(--rule); font-size:.97rem}
+.script div:last-child{border-bottom:0}
+.script span:first-child{font:600 .95rem var(--display); color:var(--muted)}
+.script q{quotes:"“" "”"; font-weight:500}
+.note{font-size:.9rem; color:var(--muted); margin-top:10px}
+
+.signals{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:14px; margin-top:30px}
+.sig{background:var(--sheet); border:1px solid var(--rule); padding:10px 12px 12px}
+.sig svg{display:block; width:100%; height:auto; max-height:150px}
+.sig h4{font-size:1.15rem; font-weight:700; margin-top:4px}
+.sig p{font-size:.9rem; color:var(--ink-2); margin:2px 0 0}
+.fig-body{stroke:var(--ink); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; fill:none}
+.fig-head{fill:var(--ink)}
+.fig-vest{fill:var(--hivis); stroke:var(--ink); stroke-width:2}
+.fig-move{stroke:var(--red); stroke-width:3; fill:none; stroke-linecap:round}
+.fig-palm{fill:var(--ink)}
+
+/* Zones */
+.zones{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0; border-top:3px solid var(--ink)}
+.zone{padding:16px 18px 18px 0; border-bottom:1px solid var(--rule)}
+.zone h3{display:flex; align-items:baseline; gap:10px}
+.zone .fig{font:700 1.5rem var(--display); color:var(--red); min-width:2.6rem}
+.zone p{color:var(--ink-2); margin:6px 0 0; font-size:.98rem}
+@media (min-width:700px){.zone{padding-right:28px}}
+
+/* Roles */
+.roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:0 44px}
+.role{padding:18px 0; border-bottom:1px solid var(--rule)}
+.role h3{font-size:1.5rem}
+.role .owns{color:var(--muted); font-size:.95rem; margin:2px 0 8px}
+.role ul{margin:0; padding-left:20px; font-size:.97rem}
+.role li{margin-bottom:4px}
+
+/* Regulations */
+.filters{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px}
+.filters button{font:600 .98rem var(--display); border:1.5px solid var(--rule); background:var(--sheet); color:var(--ink-2); padding:7px 12px; border-radius:4px; cursor:pointer}
+.filters button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--paper)}
+.regs{border-top:3px solid var(--ink)}
+.reg{display:grid; grid-template-columns:minmax(150px,13rem) minmax(0,1.3fr) minmax(0,1fr); gap:6px 26px; padding:14px 0; border-bottom:1px solid var(--rule)}
+.reg .c{font:700 1.08rem var(--display); font-variant-numeric:tabular-nums}
+.reg .c small{display:block; font:500 .92rem var(--body); color:var(--muted); margin-top:2px}
+.reg .r{font-size:.97rem}
+.reg .i{font-size:.93rem; color:var(--ink-2)}
+.reg .i::before{content:"Inspector checks: "; font-weight:600; color:var(--ink)}
+@media (max-width:820px){.reg{grid-template-columns:1fr}}
+.callout{border-left:5px solid var(--hivis); background:var(--sheet); padding:12px 16px; margin-top:22px; font-size:.95rem; color:var(--ink-2); max-width:90ch}
+
+/* Docs table */
+.docs{width:100%; border-collapse:collapse; font-size:.96rem}
+.docs th,.docs td{padding:10px 10px; border-bottom:1px solid var(--rule); text-align:left; vertical-align:top}
+.docs th{font:600 .98rem var(--display); color:var(--muted); border-bottom:2px solid var(--ink)}
+.docs td:first-child{width:36px}
+.docs .dn{font-weight:600}
+.docs input{width:20px; height:20px; accent-color:var(--green)}
+.docs .basis{font:600 .9rem var(--display); color:var(--ink-2)}
+.tablewrap{overflow-x:auto}
+.progress{display:flex; align-items:center; gap:12px; margin:0 0 14px}
+.bar{flex:1; max-width:360px; height:10px; background:var(--sheet-2); border-radius:5px; overflow:hidden}
+.bar span{display:block; height:100%; width:0; background:var(--green); transition:width .3s}
+.progress b{font-family:var(--display); font-size:1.1rem}
+
+/* Audit */
+.audit-meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:20px}
+.audit-meta label{display:grid; gap:4px; font:600 .95rem var(--display); color:var(--ink-2)}
+.audit-meta input,.audit-notes textarea{font:inherit; font-size:1rem; padding:9px 10px; border:1.5px solid var(--rule); border-radius:4px; background:var(--sheet); color:var(--ink); width:100%}
+.audit-group{margin-bottom:22px}
+.audit-group h3{padding-bottom:6px; border-bottom:2px solid var(--ink)}
+.aitem{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; align-items:center; padding:10px 0; border-bottom:1px solid var(--rule)}
+.aitem .t{font-size:.98rem}
+.aitem .t small{display:block; color:var(--muted); font-size:.85rem}
+.pf{display:inline-flex; border:1.5px solid var(--rule); border-radius:4px; overflow:hidden}
+.pf button{font:700 .9rem var(--display); border:0; background:var(--sheet); color:var(--ink-2); padding:8px 11px; min-width:46px; cursor:pointer; border-right:1px solid var(--rule)}
+.pf button:last-child{border-right:0}
+.pf button[aria-pressed="true"][data-v="pass"]{background:var(--green); color:#fff}
+.pf button[aria-pressed="true"][data-v="fail"]{background:var(--red); color:#fff}
+.pf button[aria-pressed="true"][data-v="na"]{background:var(--ink-2); color:var(--paper)}
+@media (max-width:560px){.aitem{grid-template-columns:1fr}}
+.score{display:flex; flex-wrap:wrap; gap:10px 28px; padding:14px 16px; background:var(--ink); color:var(--paper); margin:6px 0 16px; font-family:var(--display); font-size:1.15rem}
+.score b{font-size:1.5rem; margin-right:6px}
+.audit-notes label{display:grid; gap:6px; font:600 1rem var(--display)}
+.audit-notes textarea{min-height:110px; resize:vertical}
+.audit-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+
+/* Quiz */
+.quiz{max-width:760px; background:var(--sheet); border:1px solid var(--rule); padding:clamp(16px,3vw,28px)}
+.qhead{display:flex; justify-content:space-between; font:600 1rem var(--display); color:var(--muted); margin-bottom:8px}
+.qtext{font:600 1.45rem/1.2 var(--display); margin-bottom:14px}
+.opts{display:grid; gap:8px}
+.opts button{text-align:left; font:inherit; font-size:1rem; background:var(--paper); color:var(--ink); border:1.5px solid var(--rule); border-radius:4px; padding:11px 14px; cursor:pointer}
+.opts button:hover:not(:disabled){border-color:var(--ink)}
+.opts button.right{border-color:var(--green); background:color-mix(in srgb,var(--green) 14%,var(--paper))}
+.opts button.wrong{border-color:var(--red); background:color-mix(in srgb,var(--red) 12%,var(--paper))}
+.opts button:disabled{cursor:default}
+.explain{margin-top:12px; padding:10px 12px; border-left:4px solid var(--ink); background:var(--paper); font-size:.97rem; display:none}
+.explain.on{display:block}
+.qnav{display:flex; justify-content:flex-end; gap:10px; margin-top:14px}
+
+footer{padding:36px 0 48px; border-top:1px solid var(--rule); color:var(--muted); font-size:.92rem}
+footer p{max-width:90ch}
+
+/* Scene element styles */
+.blind{fill:var(--red); opacity:.09}
+.swing{fill:var(--red-soft); stroke:var(--red); stroke-width:2.5; stroke-dasharray:10 8}
+.zone-label{font:600 15px var(--display); fill:var(--red)}
+.map-label{font:600 15px var(--display); fill:var(--ink-2)}
+.map-label.strong{fill:var(--ink); font-size:16px}
+.hidden-layer{display:none}
+#alarm path{stroke:var(--red); stroke-width:3; fill:none; opacity:0}
+#alarm.on path{animation:ping 1s infinite}
+#alarm.on path:nth-child(2){animation-delay:.2s}
+#alarm.on path:nth-child(3){animation-delay:.4s}
+@keyframes ping{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.beacon{fill:var(--hivis); animation:beacon 1.2s infinite}
+@keyframes beacon{0%,100%{opacity:.35}50%{opacity:1}}
+.hornwave{stroke:var(--amber); stroke-width:3; fill:none; opacity:0}
+.hornwave.on{animation:ping .5s 3}
+@media (prefers-reduced-motion: reduce){
+  #alarm.on path{animation:none; opacity:.9}
+  .beacon{animation:none; opacity:1}
+  .hornwave.on{animation:none; opacity:.9}
+}
+@media print{
+  .topbar,.controls,.stage-bar,.filters,.audit-actions,.qnav{display:none!important}
+  body{background:#fff; color:#000}
+  section.block{break-inside:auto; padding:20px 0}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#cf2f2b"/>
+    </marker>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">Truck–excavator loading</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="index.html">← All modules</a>
+      <a href="#sim">Loading cycle</a>
+      <a href="#protocol">Signals &amp; radio</a>
+      <a href="#zones">Danger zones</a>
+      <a href="#roles">Roles</a>
+      <a href="#regs">Regulations</a>
+      <a href="#docs">Documentation</a>
+      <a href="#audit">Inspector checklist</a>
+      <a href="#quiz">Knowledge check</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <h1>Who moves, when, and who said so</h1>
+    <p class="lede">A training module for excavator operators, haul truck drivers, spotters and site inspectors. Step through one full loading cycle below and watch every message that has to pass between the machines before anything moves.</p>
+    <div class="scope">
+      <span><b>Audience:</b> operators, drivers, spotters, inspectors</span>
+      <span><b>Primary reference:</b> US OSHA 29 CFR 1926 (construction)</span>
+      <span><b>Also covers:</b> MSHA, DOT/FMCSA, consensus standards, UK/CA/AU/EU pointers</span>
+    </div>
+  </div>
+
+  <!-- ============ SIMULATOR ============ -->
+  <div class="sim" id="sim">
+    <div class="stage">
+      <div class="stage-bar">
+        <div class="seg" role="group" aria-label="Loading layout">
+          <button type="button" data-scn="backin" aria-pressed="true">Back-in with spotter</button>
+          <button type="button" data-scn="drive" aria-pressed="false">Drive-through</button>
+        </div>
+        <div class="layers">
+          <label><input type="checkbox" id="lyrSwing" checked> Swing zone</label>
+          <label><input type="checkbox" id="lyrBlind" checked> Blind spots</label>
+          <label><input type="checkbox" id="lyrLabels" checked> Labels</label>
+        </div>
+      </div>
+      <div class="scene">
+        <svg id="site" viewBox="0 0 960 580" role="img" aria-labelledby="siteTitle siteDesc">
+          <title id="siteTitle">Plan view of a loading area</title>
+          <desc id="siteDesc">An excavator beside an excavation loads a dump truck parked on the haul road. A dashed red circle marks the excavator swing radius exclusion zone. Shaded areas mark machine blind spots.</desc>
+          <defs>
+            <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="10" stroke="var(--pit-dark)" stroke-width="3"/>
+            </pattern>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0V40" fill="none" stroke="var(--ground-line)" stroke-width="1"/>
+            </pattern>
+            <pattern id="treads" width="8" height="24" patternUnits="userSpaceOnUse">
+              <rect width="8" height="24" fill="var(--steel)"/>
+              <line x1="1" y1="0" x2="1" y2="24" stroke="var(--ink)" stroke-width="2" opacity=".55"/>
+            </pattern>
+          </defs>
+
+          <rect width="960" height="580" fill="var(--ground)"/>
+          <rect width="960" height="580" fill="url(#grid)"/>
+
+          <!-- excavation -->
+          <rect x="30" y="40" width="270" height="290" fill="var(--pit)"/>
+          <rect x="30" y="40" width="270" height="290" fill="url(#hatch)" opacity=".55"/>
+          <rect x="60" y="70" width="210" height="230" fill="none" stroke="var(--pit-dark)" stroke-width="2" stroke-dasharray="6 6"/>
+          <line x1="30" y1="348" x2="300" y2="348" stroke="var(--hivis)" stroke-width="8" stroke-dasharray="18 10"/>
+          <line x1="300" y1="40" x2="300" y2="330" stroke="var(--ink)" stroke-width="2"/>
+          <g class="lbl">
+            <text x="165" y="190" text-anchor="middle" class="map-label strong" fill="var(--sheet)" style="fill:var(--sheet)">Excavation</text>
+            <text x="34" y="372" class="map-label">Edge barricade / stop logs</text>
+            <text x="314" y="56" class="map-label">2 ft min. setback</text>
+          </g>
+
+          <!-- haul road -->
+          <rect x="0" y="395" width="960" height="90" fill="var(--road)"/>
+          <line x1="0" y1="395" x2="960" y2="395" stroke="var(--road-edge)" stroke-width="3"/>
+          <line x1="0" y1="485" x2="960" y2="485" stroke="var(--road-edge)" stroke-width="3"/>
+
+          <!-- marked positions -->
+          <rect id="stageBack" x="705" y="405" width="170" height="70" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="8 6"/>
+          <rect id="stageDrive" x="48" y="405" width="170" height="70" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="8 6" style="display:none"/>
+          <rect x="478" y="405" width="168" height="70" fill="none" stroke="var(--hivis)" stroke-width="3" stroke-dasharray="10 6"/>
+          <g class="lbl">
+            <text id="stageBackLbl" x="790" y="508" text-anchor="middle" class="map-label">Staging (wait here)</text>
+            <text id="stageDriveLbl" x="133" y="508" text-anchor="middle" class="map-label" style="display:none">Staging (wait here)</text>
+            <text x="562" y="508" text-anchor="middle" class="map-label">Load position</text>
+            <text x="950" y="570" text-anchor="end" class="map-label">Exit and load check ▶</text>
+            <text x="10" y="570" class="map-label" style="font-size:13px">Plan view, not to scale</text>
+          </g>
+
+          <!-- swing / exclusion zone -->
+          <g id="swingLayer">
+            <circle cx="420" cy="240" r="250" class="swing"/>
+            <text x="560" y="34" class="zone-label lbl">Swing radius: exclusion zone</text>
+          </g>
+
+          <!-- spotter -->
+          <g id="spotter" transform="translate(660 360)">
+            <ellipse rx="13" ry="8" fill="var(--hivis)" stroke="var(--ink)" stroke-width="2"/>
+            <circle r="5.5" fill="var(--ink)"/>
+            <text y="-15" text-anchor="middle" class="map-label strong lbl">Spotter</text>
+          </g>
+
+          <!-- truck -->
+          <g id="truck" transform="translate(790 440)">
+            <g class="blindLayer">
+              <polygon class="blind" points="-84,-28 -210,-62 -210,62 -84,28"/>
+              <polygon class="blind" points="-84,28 80,28 80,64 -84,84"/>
+            </g>
+            <g fill="var(--ink)">
+              <rect x="-74" y="-34" width="24" height="8" rx="2"/><rect x="-46" y="-34" width="24" height="8" rx="2"/><rect x="54" y="-33" width="18" height="7" rx="2"/>
+              <rect x="-74" y="26" width="24" height="8" rx="2"/><rect x="-46" y="26" width="24" height="8" rx="2"/><rect x="54" y="26" width="18" height="7" rx="2"/>
+            </g>
+            <rect x="-84" y="-28" width="114" height="56" rx="3" fill="var(--steel-2)" stroke="var(--ink)" stroke-width="2"/>
+            <rect x="-78" y="-22" width="102" height="44" fill="var(--steel)"/>
+            <g id="loadG" transform="translate(-27 0) scale(0)">
+              <ellipse rx="48" ry="19" fill="var(--soil)"/>
+              <ellipse rx="26" ry="9" cx="-6" cy="-3" fill="var(--pit)"/>
+            </g>
+            <rect x="30" y="-28" width="22" height="56" rx="2" fill="var(--steel-2)" stroke="var(--ink)" stroke-width="2"/>
+            <line x1="34" y1="-22" x2="48" y2="-22" stroke="var(--ink)" stroke-width="1.5"/><line x1="34" y1="-10" x2="48" y2="-10" stroke="var(--ink)" stroke-width="1.5"/><line x1="34" y1="2" x2="48" y2="2" stroke="var(--ink)" stroke-width="1.5"/><line x1="34" y1="14" x2="48" y2="14" stroke="var(--ink)" stroke-width="1.5"/>
+            <rect x="52" y="-25" width="30" height="50" rx="5" fill="var(--blue)" stroke="var(--ink)" stroke-width="2"/>
+            <rect x="74" y="-20" width="6" height="40" rx="1" fill="var(--glass)"/>
+            <circle cx="64" cy="-12" r="5" fill="var(--hivis)" stroke="var(--ink)" stroke-width="1.5"/>
+            <rect x="66" y="-37" width="4" height="9" fill="var(--ink)"/><rect x="66" y="28" width="4" height="9" fill="var(--ink)"/>
+            <g id="alarm">
+              <path d="M-92,-12 Q-100,0 -92,12"/><path d="M-102,-19 Q-114,0 -102,19"/><path d="M-112,-26 Q-128,0 -112,26"/>
+            </g>
+            <text y="-40" x="-27" text-anchor="middle" class="map-label strong lbl">Truck 12</text>
+          </g>
+
+          <!-- excavator -->
+          <g id="excavator" transform="translate(420 240)">
+            <circle r="72" class="hornwave" id="hw1"/><circle r="90" class="hornwave" id="hw2"/>
+            <rect x="-64" y="-58" width="128" height="24" rx="10" fill="url(#treads)" stroke="var(--ink)" stroke-width="2"/>
+            <rect x="-64" y="34" width="128" height="24" rx="10" fill="url(#treads)" stroke="var(--ink)" stroke-width="2"/>
+            <rect x="-24" y="-36" width="48" height="72" fill="var(--steel-2)"/>
+            <g id="house" transform="rotate(200)">
+              <g class="blindLayer">
+                <polygon class="blind" points="-56,-40 -175,-95 -175,95 -56,40"/>
+                <polygon class="blind" points="-40,48 60,48 120,104 -40,104"/>
+              </g>
+              <rect x="-62" y="-46" width="26" height="92" rx="12" fill="var(--steel)" stroke="var(--ink)" stroke-width="2"/>
+              <rect x="-48" y="-46" width="92" height="92" rx="6" fill="var(--hivis)" stroke="var(--ink)" stroke-width="2"/>
+              <g stroke="var(--ink)" stroke-width="2" opacity=".5"><line x1="-36" y1="10" x2="-36" y2="38"/><line x1="-28" y1="10" x2="-28" y2="38"/><line x1="-20" y1="10" x2="-20" y2="38"/></g>
+              <rect x="2" y="-44" width="38" height="34" rx="4" fill="var(--ink)"/>
+              <rect x="26" y="-40" width="11" height="26" rx="1" fill="var(--glass)"/>
+              <circle cx="14" cy="-27" r="5" fill="var(--hivis)"/>
+              <rect x="30" y="-2" width="148" height="18" rx="7" fill="var(--hivis)" stroke="var(--ink)" stroke-width="2"/>
+              <line x1="42" y1="7" x2="150" y2="7" stroke="var(--steel)" stroke-width="4" stroke-linecap="round"/>
+              <rect x="170" y="1" width="50" height="12" rx="4" fill="var(--hivis)" stroke="var(--ink)" stroke-width="2"/>
+              <path d="M214,-7 L240,-11 Q250,7 240,25 L214,21 Z" fill="var(--steel)" stroke="var(--ink)" stroke-width="2"/>
+              <ellipse id="carry" cx="229" cy="7" rx="11" ry="13" fill="var(--soil)" opacity="0"/>
+              <circle cx="-22" cy="-30" r="5" class="beacon"/>
+            </g>
+            <text y="80" text-anchor="middle" class="map-label strong lbl">Excavator EX-1</text>
+          </g>
+        </svg>
+        <div class="bubbles" id="bubbles" aria-hidden="true"></div>
+        <div class="estop-banner" id="estopBanner" role="alert">■ All stop: every machine stops until the all-clear is given</div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--red-soft);border:2px dashed var(--red)"></i>Swing radius / exclusion zone</span>
+        <span><i style="background:var(--red);opacity:.3"></i>Operator blind spot</span>
+        <span><i style="border:3px dashed var(--hivis)"></i>Load position</span>
+        <span><i style="border:2px dashed var(--ink-2)"></i>Staging point</span>
+        <span><i style="background:var(--hivis);border-radius:50%;border:2px solid var(--ink)"></i>Spotter (hi-vis)</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="steps-nav" id="stepsNav" role="group" aria-label="Loading cycle steps"></div>
+      <div class="step-body" aria-live="polite">
+        <div class="step-kicker" id="stepKicker"></div>
+        <h3 class="step-title" id="stepTitle"></h3>
+        <p class="step-desc" id="stepDesc"></p>
+        <ul class="comms" id="stepComms"></ul>
+        <ul class="rules" id="stepRules"></ul>
+        <div class="cites" id="stepCites"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnPrev" type="button">Back</button>
+        <button class="btn primary" id="btnPlay" type="button">Play cycle</button>
+        <button class="btn" id="btnNext" type="button">Next step</button>
+        <button class="btn stop" id="btnStop" type="button">All stop</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROTOCOL ============ -->
+<section class="block" id="protocol">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Signals and radio protocol</h2>
+      <p><b>Site protocol used in this training:</b> use closed-loop communication for vehicle movements: a clear primary instruction (usually radio) and, where the site plan calls for it, a confirming horn, hand signal, light or visual acknowledgement. These horn codes, read-backs and vehicle hand signals are <b>site-specific procedures, not national OSHA signal codes</b>. The crew must be trained on the procedure actually used at the site before movements begin.</p>
+    </div>
+
+    <div class="proto">
+      <div>
+        <h3 style="margin-bottom:6px">Six site rules used in this training</h3>
+        <ol class="golden">
+          <li><div><b>The excavator operator controls the loading area.</b>Trucks wait at staging until called in. Nobody enters the swing radius on assumption.</div></li>
+          <li><div><b>Closed-loop read-back (site rule).</b>For this training scenario, the receiver repeats movement instructions before acting. OSHA does not prescribe a universal read-back for excavator–truck movements; this is the project's communication control.</div></li>
+          <li><div><b>Lost contact means stop.</b>If the driver loses sight of the spotter, or radio goes quiet, the machine stops and waits.</div></li>
+          <li><div><b>Anyone may call “All stop” under this site's stop-work policy.</b>Operators stop first and the crew resolves the hazard before resuming. This is a site safety rule; crane-specific OSHA stop-signal requirements are separate.</div></li>
+          <li><div><b>Eye contact before approach.</b>Ground workers approach a machine only after the operator has seen them, acknowledged, and grounded the bucket.</div></li>
+          <li><div><b>One spotter per vehicle.</b>The driver follows one designated signal person only, except for an emergency stop, which is obeyed from anyone.</div></li>
+        </ol>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:6px">Horn code used in this module</h3>
+        <table class="horn">
+          <thead><tr><th>Signal</th><th>Meaning</th><th>Driver’s response</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pips" aria-label="One short blast"><i></i></span></td><td><b>Stop / hold</b></td><td>Stop immediately, set brake, wait</td></tr>
+            <tr><td><span class="pips" aria-label="Two short blasts"><i></i><i></i></span></td><td><b>Go forward</b><br><small>Load complete, clear to leave (or pull in, drive-through)</small></td><td>Read back on radio, check mirrors, move off</td></tr>
+            <tr><td><span class="pips" aria-label="Three short blasts"><i></i><i></i><i></i></span></td><td><b>Reverse</b><br><small>Back in to load position</small></td><td>Read back, reverse slowly with alarm on, watch spotter</td></tr>
+            <tr><td><span class="pips" aria-label="One continuous blast"><i class="long"></i></span></td><td><b>Emergency: all stop</b></td><td>Stop, hands off controls, wait for all-clear</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Horn signals supplement the radio; they are not a substitute for it on a noisy site. Confirm that horns and reverse alarms are audible above surrounding noise at the actual loading position.</p>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:6px">Standard radio calls</h3>
+        <div class="script">
+          <div><span>Arrive</span><span><q>EX-1, Truck 12 at staging, ready to load.</q></span></div>
+          <div><span>Hold</span><span><q>Truck 12, hold at staging.</q> → <q>Holding.</q></span></div>
+          <div><span>Call in</span><span><q>Truck 12, back in.</q> → <q>Backing in.</q></span></div>
+          <div><span>Spot</span><span><q>Stop. Good there.</q> → <q>Stopped, brake set.</q></span></div>
+          <div><span>Exit cab</span><span><q>EX-1, Truck 12 needs out.</q> → <q>Bucket grounded, go.</q></span></div>
+          <div><span>Release</span><span><q>Truck 12, loaded, clear to go.</q> → <q>Truck 12 leaving.</q></span></div>
+          <div><span>Emergency</span><span><q>All stop, all stop, all stop.</q> Every unit replies with call sign and <q>stopped</q>.</span></div>
+        </div>
+        <p class="note">Say who you are calling, then who you are, then the message. Keep a dedicated channel for the loading area and do a radio check at the start of every shift.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:40px">Spotter hand signals (facing the driver)</h3>
+    <div class="signals">
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L34,64 L30,34 M70,44 L86,64 L90,34"/>
+          <path class="fig-move" d="M18,40 Q16,22 32,18" marker-end="url(#ah)"/><path class="fig-move" d="M102,40 Q104,22 88,18" marker-end="url(#ah)"/>
+        </svg>
+        <h4>Come back (reverse)</h4>
+        <p>Both forearms up, palms toward you, beckoning. Driver reverses slowly.</p>
+      </figure>
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L44,66 L42,88 M70,44 L82,24 L84,8"/>
+          <rect class="fig-palm" x="77" y="0" width="14" height="12" rx="3"/>
+        </svg>
+        <h4>Stop</h4>
+        <p>Arm raised, flat palm facing the driver. Driver stops and holds.</p>
+      </figure>
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L10,44 M70,44 L110,44"/>
+          <path class="fig-move" d="M14,56 L40,56" marker-start="url(#ah)" marker-end="url(#ah)"/><path class="fig-move" d="M80,56 L106,56" marker-start="url(#ah)" marker-end="url(#ah)"/>
+        </svg>
+        <h4>All stop (emergency)</h4>
+        <p>Both arms out, palms down, waving back and forth. Obeyed from anyone.</p>
+      </figure>
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L36,66 L42,34 M70,44 L84,66 L78,34"/>
+          <rect class="fig-palm" x="38" y="18" width="5" height="18" rx="2"/><rect class="fig-palm" x="77" y="18" width="5" height="18" rx="2"/>
+          <path class="fig-move" d="M24,10 L38,10" marker-end="url(#ah)"/><path class="fig-move" d="M96,10 L82,10" marker-end="url(#ah)"/>
+        </svg>
+        <h4>Distance remaining</h4>
+        <p>Palms facing each other, gap closing as the truck nears the stop point.</p>
+      </figure>
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L44,66 L42,88 M70,44 L104,44"/>
+          <path class="fig-move" d="M88,30 L114,30" marker-end="url(#ah)"/>
+        </svg>
+        <h4>Steer this way</h4>
+        <p>Arm extended, pointing the direction the rear of the truck should go.</p>
+      </figure>
+      <figure class="sig" style="margin:0">
+        <svg viewBox="0 0 120 140" aria-hidden="true">
+          <circle class="fig-head" cx="60" cy="22" r="10"/><polygon class="fig-vest" points="48,38 72,38 74,84 46,84"/>
+          <path class="fig-body" d="M60,84 L49,130 M60,84 L71,130"/>
+          <path class="fig-body" d="M50,44 L44,66 L42,88 M70,44 L90,28 L102,12"/>
+          <path class="fig-move" d="M82,12 Q98,2 112,14" marker-end="url(#ah)"/>
+        </svg>
+        <h4>Move off</h4>
+        <p>Arm raised, sweeping in the direction of travel. Only after the operator’s release.</p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONES ============ -->
+<section class="block" id="zones">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Danger zones around the loading point</h2>
+      <p>Most struck-by and caught-between incidents at loading points happen in a handful of predictable places. Mark them on the ground and on the traffic management plan.</p>
+    </div>
+    <div class="zones">
+      <div class="zone"><h3><span class="fig">R+</span>Swing radius</h3><p>Full reach of the boom plus tail swing of the counterweight, with a buffer set by the site plan. No ground personnel inside while the machine is live. Barricade it where foot traffic is possible.</p></div>
+      <div class="zone"><h3><span class="fig">0</span>People under the bucket</h3><p>OSHA 1926.651(e) prohibits employees beneath loads handled by lifting or digging equipment and requires employees to stand away from vehicles being loaded. <b>This training also uses the conservative site rule that the bucket does not pass over the truck cab.</b></p></div>
+      <div class="zone"><h3><span class="fig">2</span>Truck blind sides</h3><p>Directly behind the truck and along the passenger side. A spotter stands on the driver’s side, visible in the mirror, never in the reversing path.</p></div>
+      <div class="zone"><h3><span class="fig">2 ft</span>Excavation edge</h3><p>Spoil and equipment kept at least 2 ft back (1926.651(j)(2)). Use stop logs, berms or barricades where trucks approach an edge without a clear view (1926.651(f)).</p></div>
+      <div class="zone"><h3><span class="fig">10 ft</span>Overhead power lines</h3><p>Under OSHA 1926.600(a)(6), equipment working or travelling near energized lines keeps at least 10 ft clearance for lines rated 50 kV or less, with greater clearance for higher voltages unless the line is de-energized and visibly grounded. Watch booms and raised bodies. <b>Showing lines and controlled clearances on the site plan is a project planning control, not wording from this OSHA paragraph.</b></p></div>
+      <div class="zone"><h3><span class="fig">360°</span>Excavator rear</h3><p>The counterweight swings behind the tracks where the operator cannot see. Workers on foot stay out of the tail-swing area and never walk between the machine and a fixed object.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROLES ============ -->
+<section class="block" id="roles">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Roles and responsibilities</h2>
+      <p>Each person owns specific decisions in the loading cycle. Inspectors should be able to ask anyone on the crew “who tells the truck to move?” and get the same answer.</p>
+    </div>
+    <div class="roles">
+      <div class="role"><h3>Excavator operator</h3><p class="owns">Owns: when trucks enter, where they stop, when they leave</p>
+        <ul><li>Calls trucks in from staging and releases them when loaded.</li><li>Holds the bucket clear of the truck path during spotting.</li><li>Swings over the rear or side of the bed, never over the cab or people.</li><li>Stops swinging if anyone enters the swing radius.</li><li>Grounds the bucket whenever the machine is idle or the operator leaves the seat.</li></ul></div>
+      <div class="role"><h3>Truck driver</h3><p class="owns">Owns: their vehicle’s movement within the signals given</p>
+        <ul><li>Stops at staging and waits to be called. Uses the site's closed-loop read-back procedure.</li><li>Reverses under the applicable backup-alarm/observer requirement and the site's backing procedure.</li><li>Sets the parking brake and keeps hands visible during loading.</li><li>For a covered haulage vehicle loaded by power equipment, the required cab shield/canopy must be present under 1926.601(b)(6). Under 1926.651(e), an operator may remain in a compliant protected cab; if the site procedure places the driver in a designated safe area instead, the move is completed before loading begins.</li><li>Checks and secures the load in the designated area before entering public roads, as applicable.</li></ul></div>
+      <div class="role"><h3>Spotter / signal person</h3><p class="owns">Owns: guiding a reversing truck safely</p>
+        <ul><li>Trained, wearing hi-vis, briefed on the site signals.</li><li>Stands on the driver’s side, visible in the mirror, outside the truck path and the swing radius.</li><li>Does no other task while spotting: no phone, no shovel.</li><li>Gives the stop signal the moment anything is uncertain.</li></ul></div>
+      <div class="role"><h3>Ground personnel</h3><p class="owns">Owns: their own position on site</p>
+        <ul><li>Stay out of the swing radius and the haul road.</li><li>Approach a machine only after eye contact and acknowledgement from the operator.</li><li>Use designated walkways; never walk behind a reversing vehicle.</li></ul></div>
+      <div class="role"><h3>Supervisor / competent person</h3><p class="owns">Owns: the plan, the briefing, and stop-work decisions</p>
+        <ul><li>Writes and maintains the traffic management plan and JHA.</li><li>Assigns radio channel, call signs and spotters each shift.</li><li>Holds the pre-task briefing and records attendance.</li><li>Inspects the excavation daily and after rain or other changes.</li></ul></div>
+      <div class="role"><h3>Inspector</h3><p class="owns">Owns: verification that plan, people and equipment match</p>
+        <ul><li>Checks that documents exist and match what is actually on the ground.</li><li>Observes at least one full loading cycle, including signals and read-backs.</li><li>Tests alarms and horns at the loading position.</li><li>Records findings and follows up on corrective actions.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REGULATIONS ============ -->
+<section class="block" id="regs">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Regulations and standards</h2>
+      <p>Summaries written for training, with the point an inspector should check. Federal OSHA is the baseline; state-plan states (for example Cal/OSHA) may be stricter. MSHA rules replace OSHA at mines, quarries and many borrow pits. DOT rules apply once a truck uses public roads.</p>
+    </div>
+    <div class="filters" id="regFilters" role="group" aria-label="Filter regulations">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="osha" aria-pressed="false">OSHA construction</button>
+      <button type="button" data-f="msha" aria-pressed="false">MSHA (mines &amp; quarries)</button>
+      <button type="button" data-f="dot" aria-pressed="false">DOT / FMCSA (public roads)</button>
+      <button type="button" data-f="std" aria-pressed="false">Consensus standards</button>
+      <button type="button" data-f="intl" aria-pressed="false">Outside the US</button>
+    </div>
+    <div class="regs" id="regList"></div>
+    <div class="callout">Citations are paraphrased and current to the author’s knowledge as of mid-2026. Before using this module for formal training or enforcement, verify each section against the official text at ecfr.gov (or your national regulator), your state plan, the equipment manufacturer’s manuals, and your company’s own procedures. Where they differ, the stricter requirement applies.</div>
+  </div>
+</section>
+
+<!-- ============ DOCUMENTATION ============ -->
+<section class="block" id="docs">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Documentation that should exist on site</h2>
+      <p>Tick each document as you confirm it is current and available. <b>Compliance note:</b> this table mixes legally required records, records required only in certain operations, and project/company evidence recommended to demonstrate that a required activity occurred; the “Basis” column identifies that distinction. Progress is saved in this browser only.</p>
+    </div>
+    <div class="progress"><b id="docCount">0 / 0</b><div class="bar"><span id="docBar"></span></div></div>
+    <div class="tablewrap">
+      <table class="docs">
+        <thead><tr><th><span class="sr-only" style="position:absolute;left:-9999px">Confirmed</span></th><th>Document</th><th>Kept by</th><th>How often</th><th>Basis</th></tr></thead>
+        <tbody id="docBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUDIT ============ -->
+<section class="block" id="audit">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Inspector field checklist</h2>
+      <p>Use this while observing a live loading operation. Mark each item Pass, Fail or N/A, then build a findings summary you can copy into your report. Entries are saved in this browser only.</p>
+    </div>
+    <div class="audit-meta">
+      <label>Inspector<input id="m_insp" autocomplete="name"></label>
+      <label>Date<input id="m_date" type="date"></label>
+      <label>Site / location<input id="m_site"></label>
+      <label>Equipment / crew observed<input id="m_crew" placeholder="e.g. EX-1, Trucks 12 & 14"></label>
+    </div>
+    <div class="score" id="auditScore"></div>
+    <div id="auditGroups"></div>
+    <div class="audit-notes">
+      <label for="auditNotes">Notes and corrective actions</label>
+      <textarea id="auditNotes" placeholder="What you saw, who was told, agreed fix and due date"></textarea>
+    </div>
+    <div class="audit-actions">
+      <button class="btn primary" type="button" id="btnSummary">Build findings summary</button>
+      <button class="btn" type="button" id="btnReset">Clear checklist</button>
+    </div>
+    <div class="audit-notes" id="summaryWrap" style="display:none; margin-top:14px">
+      <label for="summaryOut">Findings summary (select all and copy)</label>
+      <textarea id="summaryOut" readonly style="min-height:200px"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="block" id="quiz">
+  <div class="wrap">
+    <div class="block-head">
+      <h2>Knowledge check</h2>
+      <p>Nine questions for operators, drivers and inspectors. Each answer explains the reasoning and the rule behind it.</p>
+    </div>
+    <div class="quiz" id="quizBox"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>About this module.</b> Prepared October 2026 as a training aid. It distinguishes regulatory requirements from recommended/site-specific controls. It is not legal advice and does not replace the approved traffic plan/JHA, manufacturer instructions, employer procedures, or jurisdiction-specific requirements. Horn codes, read-backs and vehicle hand signals in this module are site procedures unless a specific regulation is cited.</p>
+<p style="font-size:.9rem"><b>Primary verification sources:</b> <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926" target="_blank" rel="noopener">OSHA 29 CFR Part 1926</a> · <a href="https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B" target="_blank" rel="noopener">eCFR 49 CFR FMCSA rules</a> · <a href="https://mutcd.fhwa.dot.gov/kno_11th_Editionr1.htm" target="_blank" rel="noopener">FHWA MUTCD 11th Edition with Revision 1 (Dec. 2025)</a>. Verify state-plan/state DOT requirements before field use.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* ------------------------------------------------------------------ */
+/*  Scene engine                                                       */
+/* ------------------------------------------------------------------ */
+const truck = $('#truck'), house = $('#house'), loadG = $('#loadG'), carry = $('#carry'), alarm = $('#alarm'), spotter = $('#spotter');
+const S = {tx:790, top:0, ang:200, load:0, carry:0};
+const LOAD_X = 560, EXIT_X = 1120, ANG_PIT = 197, ANG_PARK = 200, ANG_TRUCK = 60.5;
+const STAGE = {backin:790, drive:133};
+let tweens = [], raf = 0, run = 0, cur = 0, scn = 'backin', playing = false, estop = false;
+let activeBubbles = [];
+
+function render(){
+  truck.setAttribute('transform', 'translate(' + S.tx.toFixed(1) + ' 440)');
+  truck.style.opacity = S.top;
+  house.setAttribute('transform', 'rotate(' + S.ang.toFixed(2) + ')');
+  loadG.setAttribute('transform', 'translate(-27 0) scale(' + Math.max(0.001,S.load).toFixed(3) + ')');
+  carry.setAttribute('opacity', S.carry.toFixed(2));
+  placeBubbles();
+}
+const ease = p => p < .5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+function frame(now){
+  raf = 0;
+  const finished = [];
+  tweens = tweens.filter(t => {
+    const p = Math.max(0, Math.min(1, (now - t.t0) / t.ms));
+    S[t.key] = t.from + (t.to - t.from) * ease(p);
+    if (p >= 1){ finished.push(t); return false; }
+    return true;
+  });
+  render();
+  finished.forEach(t => t.res());
+  if (tweens.length) raf = requestAnimationFrame(frame);
+}
+function tween(key, to, ms){
+  return new Promise(res => {
+    tweens = tweens.filter(t => { if (t.key === key){ t.res(); return false; } return true; });
+    if (reduceMotion) ms = 0;
+    if (ms <= 0 || S[key] === to){ S[key] = to; render(); res(); return; }
+    tweens.push({key, from:S[key], to, ms, t0:performance.now(), res});
+    if (!raf) raf = requestAnimationFrame(frame);
+  });
+}
+function haltAll(){
+  const ts = tweens; tweens = [];
+  if (raf){ cancelAnimationFrame(raf); raf = 0; }
+  ts.forEach(t => t.res());
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function honk(n, long){
+  ['#hw1','#hw2'].forEach(id => {
+    const h = $(id);
+    h.classList.remove('on');
+    void h.getBoundingClientRect();
+    h.style.animationDuration = long ? '2.4s' : '.5s';
+    h.style.animationIterationCount = long ? 1 : n;
+    h.classList.add('on');
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Step content                                                       */
+/* ------------------------------------------------------------------ */
+const C = (who, k, tag, msg) => ({who, k, tag, msg});
+const STEPS = [
+ { title:'Pre-task briefing and inspections', short:'Briefing',
+   desc:'Before the first truck arrives, the crew agrees how they will talk to each other and checks that every warning device works. Staging point, load position and exclusion zone are marked on the ground.',
+   comms:{
+     backin:[C('Supervisor → whole crew','brief','Briefing','Radio channel 4. Call signs EX-1 and Truck 12. Horn: 1 stop, 2 forward, 3 reverse, long blast all stop. Spotter today: J. Lee.'),
+             C('Each unit → Supervisor','radio','Radio','“EX-1, loud and clear.” “Truck 12, loud and clear.”')],
+     drive:[C('Supervisor → whole crew','brief','Briefing','Radio channel 4. Call signs EX-1 and Truck 12. Horn: 1 stop, 2 forward, 3 reverse, long blast all stop. Drive-through layout, no reversing at the loading point.'),
+             C('Each unit → Supervisor','radio','Radio','“EX-1, loud and clear.” “Truck 12, loud and clear.”')]},
+   rules:[['yes','Walk-around inspection of both machines: horn, reverse alarm, lights, mirrors, brakes.'],
+          ['yes','For covered haulage vehicles, confirm the cab shield/canopy required by 1926.601(b)(6) is present; separately confirm where the driver will be during loading under the site plan.'],
+          ['yes','Everyone on the crew signs the briefing sheet.'],
+          ['no','Starting work with a reverse alarm, horn or radio that does not work.']],
+   cites:['1926.20(b)(2)','1926.21(b)(2)','1926.601(b)(14)','1926.651(k)(1)'],
+   bubbles:{backin:[{at:'ex',k:'radio',m:'Radio check',t:'“EX-1, loud and clear.”'},{at:'spot',k:'hand',m:'Spotter briefed',t:'Signals agreed at briefing'}],
+            drive:[{at:'ex',k:'radio',m:'Radio check',t:'“EX-1, loud and clear.”'}]},
+   end:()=>({tx:STAGE[scn], top:0, ang:ANG_PARK, load:0, carry:0}),
+   play: async function(){ }
+ },
+ { title:'Arrive and hold at staging', short:'Staging',
+   desc:'The truck stops in the marked staging box, outside the swing radius, and announces itself. The excavator may still be digging. The driver does not move again until called.',
+   comms:{
+     backin:[C('Truck 12 → EX-1','radio','Radio','“EX-1, Truck 12 at staging, ready to load.”'),
+             C('EX-1 → Truck 12','radio','Radio','“Truck 12, hold at staging.” Driver reads back: “Holding.”'),
+             C('Spotter','visual','Position','Takes position on the driver’s side, visible in the left mirror, outside the swing radius.')],
+     drive:[C('Truck 12 → EX-1','radio','Radio','“EX-1, Truck 12 at staging, ready to load.”'),
+             C('EX-1 → Truck 12','radio','Radio','“Truck 12, hold at staging.” Driver reads back: “Holding.”')]},
+   rules:[['yes','Stop fully inside the staging box with the parking brake on.'],
+          ['no','Creeping toward the excavator to save time.'],
+          ['yes','Driver watches for the operator’s call, not just for a gap in the digging.']],
+   cites:['Site traffic management plan','1926.651(e)'],
+   bubbles:{backin:[{at:'truck',k:'radio',m:'Radio',t:'“Truck 12 at staging, ready to load.”'},{at:'ex',k:'radio',m:'Radio',t:'“Truck 12, hold at staging.”'}],
+            drive:[{at:'truck',k:'radio',m:'Radio',t:'“Truck 12 at staging, ready to load.”'},{at:'ex',k:'radio',m:'Radio',t:'“Truck 12, hold at staging.”'}]},
+   end:()=>({tx:STAGE[scn], top:1, ang:ANG_PIT, load:0, carry:1}),
+   play: async function(ok){
+     let arrive;
+     if (scn === 'drive'){ S.tx = -120; S.top = 1; render(); arrive = tween('tx', STAGE.drive, 2600); }
+     else { arrive = tween('top', 1, 900); }
+     await tween('ang', 188, 700); if(!ok()) return;
+     await tween('carry', 1, 300); if(!ok()) return;
+     await tween('ang', ANG_PIT, 700); if(!ok()) return;
+     await arrive;
+   }
+ },
+ { title:{backin:'Called in: reverse to the load position', drive:'Called in: pull forward to the load position'}, short:'Call in',
+   desc:{backin:'The operator stops digging, holds the bucket over the excavation away from the truck path, and calls the truck in. The driver reverses slowly with the alarm sounding, following the spotter.',
+         drive:'The operator stops digging, holds the bucket over the excavation away from the truck path, and calls the truck in. The driver pulls forward slowly and stops at the load-position marker. No reversing is needed.'},
+   comms:{
+     backin:[C('EX-1 → Truck 12','horn','Radio + 3 short','“Truck 12, back in.” Three short horn blasts.'),
+             C('Truck 12 → EX-1','radio','Read-back','“Backing in.”'),
+             C('Spotter → Truck 12','hand','Hand signal','“Come back” signal. Stays visible in the driver’s left mirror the whole time.'),
+             C('Truck 12','alarm','Reverse alarm','Sounding, audible above site noise. Lights on.')],
+     drive:[C('EX-1 → Truck 12','horn','Radio + 2 short','“Truck 12, pull in.” Two short horn blasts.'),
+            C('Truck 12 → EX-1','radio','Read-back','“Pulling in.”'),
+            C('Truck 12 ↔ EX-1','visual','Eye contact','Driver keeps the operator and the load-position marker in view.')]},
+   rules:{backin:[['yes','Reverse at walking pace or slower.'],
+                  ['no','Reversing when the spotter is out of sight. Stop and wait.'],
+                  ['no','Anyone on foot behind the truck or between the truck and the excavator.']],
+          drive:[['yes','Drive-through layouts remove reversing at the loading point and are preferred where space allows.'],
+                 ['yes','Pull in slowly and stop at the marker.'],
+                 ['no','Overrunning the marker into the swing path.']]},
+   cites:{backin:['1926.601(b)(4)','1926.602(a)(9)(ii)'], drive:['Site traffic management plan','ANSI/ASSP A10.47']},
+   bubbles:{backin:[{at:'ex',k:'horn',m:'Radio + horn ×3',t:'“Truck 12, back in.”'},{at:'truck',k:'alarm',m:'Read-back + alarm',t:'“Backing in.”'},{at:'spot',k:'hand',m:'Hand signal',t:'Come back'}],
+            drive:[{at:'ex',k:'horn',m:'Radio + horn ×2',t:'“Truck 12, pull in.”'},{at:'truck',k:'radio',m:'Read-back',t:'“Pulling in.”'}]},
+   end:()=>({tx:LOAD_X, top:1, ang:ANG_PIT, load:0, carry:1}),
+   play: async function(ok){
+     honk(scn === 'backin' ? 3 : 2);
+     await sleep(1100); if(!ok()) return;
+     if (scn === 'backin'){
+       alarm.classList.add('on');
+       await tween('tx', LOAD_X, 4600);
+       alarm.classList.remove('on');
+     } else {
+       await tween('tx', LOAD_X, 3800);
+     }
+   }
+ },
+ { title:'Stop, set the brake, confirm ready', short:'Spot',
+   desc:'The operator, who has the best view of the bed, signals the stop. The driver secures the truck and confirms on the radio. Loading does not start until that confirmation is heard.',
+   comms:{
+     backin:[C('EX-1 → Truck 12','horn','Radio + 1 short','“Stop. Good there.” One short blast.'),
+             C('Spotter → Truck 12','hand','Hand signal','Stop: raised arm, palm facing the driver.'),
+             C('Truck 12 → EX-1','radio','Radio','“Stopped, brake set.”')],
+     drive:[C('EX-1 → Truck 12','horn','Radio + 1 short','“Stop. Good there.” One short blast.'),
+            C('Truck 12 → EX-1','radio','Radio','“Stopped, brake set.”'),
+            C('Truck 12 ↔ EX-1','visual','Eye contact','Through the cab glass before the first swing.')]},
+   rules:[['yes','Parking brake on, transmission in neutral, hands visible on the wheel.'],
+          ['yes','For a covered haulage vehicle, the required cab shield/canopy must be present. If the site procedure places the driver outside the cab, the driver moves to the designated safe area before loading; leaving the cab does not substitute for a required vehicle canopy.'],
+          ['yes','Spotter steps back, outside the swing radius, and stays in view.']],
+   cites:['1926.651(e)','1926.601(b)(6)'],
+   bubbles:{backin:[{at:'ex',k:'horn',m:'Radio + horn ×1',t:'“Stop. Good there.”'},{at:'truck',k:'radio',m:'Radio',t:'“Stopped, brake set.”'},{at:'spot',k:'hand',m:'Hand signal',t:'Stop'}],
+            drive:[{at:'ex',k:'horn',m:'Radio + horn ×1',t:'“Stop. Good there.”'},{at:'truck',k:'radio',m:'Radio',t:'“Stopped, brake set.”'}]},
+   end:()=>({tx:LOAD_X, top:1, ang:ANG_PIT, load:0, carry:1}),
+   play: async function(){ honk(1); }
+ },
+ { title:'Loading', short:'Load',
+   desc:'The bucket comes in over the rear or side of the bed, never over the cab. Material is placed low and spread evenly. The driver stays still and off the radio unless something is wrong.',
+   comms:{
+     backin:[C('EX-1','visual','Swing path','Swings through the side away from the cab; dumps low over the bed.'),
+             C('Truck 12 → EX-1 (only if needed)','radio','Radio','“EX-1, Truck 12 needs out.” Waits for: “Bucket grounded, go.”'),
+             C('Anyone → all units','alarm','All stop','If a person or vehicle enters the zone: “All stop” on the radio, long horn blast.')],
+     drive:null},
+   rules:[['no','Swinging over the cab or over anyone.'],
+          ['yes','First passes toward the front of the bed. Avoid dropping large rock from height.'],
+          ['yes','Load within rated capacity and legal weight, with no overhang.'],
+          ['no','Anyone approaching the truck while it is being loaded.']],
+   cites:['1926.651(e)','1926.601(b)(6)'],
+   bubbles:{backin:[{at:'ex',k:'radio',m:'Swing path',t:'Over the rear and side of the bed only'},{at:'truck',k:'radio',m:'Driver',t:'Brake set, hands visible, radio quiet'}], drive:null},
+   end:()=>({tx:LOAD_X, top:1, ang:ANG_PIT, load:1, carry:0}),
+   play: async function(ok){
+     const levels = [0.6, 0.85, 1];
+     for (let p = 0; p < 3; p++){
+       await tween('ang', ANG_TRUCK, 1500); if(!ok()) return;
+       await sleep(200); if(!ok()) return;
+       tween('carry', 0, 350);
+       await tween('load', levels[p], 600); if(!ok()) return;
+       await tween('ang', ANG_PIT, 1400); if(!ok()) return;
+       if (p < 2){ await sleep(200); if(!ok()) return; await tween('carry', 1, 350); if(!ok()) return; }
+     }
+   }
+ },
+ { title:'Release and depart', short:'Release',
+   desc:'With the bucket back over the excavation, the operator releases the truck. The driver reads back, checks mirrors and pulls away to the load-check area outside the work zone. Then the next truck is called to staging.',
+   comms:{
+     backin:[C('EX-1 → Truck 12','horn','Radio + 2 short','“Truck 12, loaded, clear to go.” Two short blasts.'),
+             C('Truck 12 → EX-1','radio','Read-back','“Truck 12 leaving.”'),
+             C('EX-1 → Truck 14','radio','Radio','“Truck 14, come to staging.”')],
+     drive:null},
+   rules:[['yes','Bucket swung back to the dig side before the truck moves.'],
+          ['yes','Load check outside the zone: no overhang, loose rock knocked off rails and tailgate.'],
+          ['yes','Tarp or cover the load before public roads where required.'],
+          ['no','Climbing onto the load to level it at the loading point.']],
+   cites:['49 CFR 393.100 (public roads)','State load-cover laws'],
+   bubbles:{backin:[{at:'ex',k:'horn',m:'Radio + horn ×2',t:'“Truck 12, loaded, clear to go.”'},{at:'truck',k:'radio',m:'Read-back',t:'“Truck 12 leaving.”'}], drive:null},
+   end:()=>({tx:EXIT_X, top:0, ang:ANG_PIT, load:1, carry:0}),
+   play: async function(ok){
+     honk(2);
+     await sleep(1100); if(!ok()) return;
+     await tween('tx', EXIT_X - 180, 3200); if(!ok()) return;
+     tween('tx', EXIT_X, 900);
+     await tween('top', 0, 900);
+   }
+ }
+];
+const ESTOP = {
+  title:'All stop',
+  desc:'Anyone who sees a hazard (a person in the swing radius, lost radio contact, the spotter out of view) calls an all stop. Every machine stops where it is.',
+  comms:[C('Anyone → all units','alarm','Radio + long blast','“All stop, all stop, all stop.” One continuous horn blast.'),
+         C('Spotter → Truck 12','hand','Hand signal','All stop: both arms out, palms down, waving.'),
+         C('Each unit → caller','radio','Radio','“EX-1 stopped.” “Truck 12 stopped.” Every unit confirms by call sign.')],
+  rules:[['yes','Stop all motion and take hands off the controls.'],
+         ['yes','The person who called the stop explains the hazard on the radio.'],
+         ['yes','Restart only when the operator in charge gives the all-clear and each unit reads it back.'],
+         ['no','Restarting because the hazard “looks gone”.']],
+  cites:['Site stop-work procedure','1926.21(b)(2)'],
+  bubbles:[{at:'ex',k:'stop',m:'Radio + long blast',t:'“All stop, all stop, all stop.”'},{at:'truck',k:'stop',m:'Radio',t:'“Truck 12 stopped.”'}]
+};
+const pick = (v) => (v && typeof v === 'object' && !Array.isArray(v)) ? (v[scn] || v.backin) : v;
+const pickComms = st => st.comms[scn] || st.comms.backin;
+const pickBubbles = st => st.bubbles[scn] || st.bubbles.backin;
+
+/* ------------------------------------------------------------------ */
+/*  Bubbles                                                            */
+/* ------------------------------------------------------------------ */
+const bubbleBox = $('#bubbles');
+function setBubbles(list){
+  bubbleBox.innerHTML = '';
+  activeBubbles = list.filter(b => b.at !== 'spot' || scn === 'backin').map(b => {
+    const el = document.createElement('div');
+    el.className = 'bubble k-' + b.k;
+    el.innerHTML = '<span class="m">' + esc(b.m) + '</span>' + esc(b.t);
+    bubbleBox.appendChild(el);
+    return {el, at:b.at};
+  });
+  placeBubbles();
+}
+function placeBubbles(){
+  activeBubbles.forEach(b => {
+    let x, y, dir;
+    if (b.at === 'ex'){ x = 420; y = 168; dir = 'up'; }
+    else if (b.at === 'spot'){ x = 694; y = 352; dir = 'right'; }
+    else { y = 490;
+           if (S.tx < 330){ x = Math.max(8, S.tx - 84); dir = 'downl'; }
+           else if (S.tx > 700){ x = Math.min(952, S.tx + 82); dir = 'downr'; }
+           else { x = S.tx - 10; dir = 'down'; }
+           b.el.style.opacity = (S.top > .4 && S.tx < 960) ? 1 : 0; }
+    b.el.classList.remove('up','down','downl','downr','right'); b.el.classList.add(dir);
+    b.el.style.left = (x/960*100) + '%';
+    b.el.style.top = (y/580*100) + '%';
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Panel                                                              */
+/* ------------------------------------------------------------------ */
+const nav = $('#stepsNav');
+STEPS.forEach((st, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = i + 1;
+  b.addEventListener('click', () => { stopPlaying(); go(i); });
+  nav.appendChild(b);
+});
+function fillPanel(kicker, title, desc, comms, rules, cites){
+  $('#stepKicker').textContent = kicker;
+  $('#stepTitle').textContent = title;
+  $('#stepDesc').textContent = desc;
+  $('#stepComms').innerHTML = comms.map(c =>
+    '<li class="k-' + c.k + '-b"><span class="who">' + esc(c.who) + '</span><span class="tag t-' + c.k + '">' + esc(c.tag) + '</span><span class="msg">' + esc(c.msg) + '</span></li>').join('');
+  $('#stepRules').innerHTML = rules.map(r => '<li class="' + r[0] + '">' + esc(r[1]) + '</li>').join('');
+  $('#stepCites').innerHTML = cites.map(c => '<span class="cite">' + esc(/^19\d\d\./.test(c) ? '29 CFR ' + c : c) + '</span>').join('');
+}
+function showStep(i){
+  const st = STEPS[i];
+  fillPanel('Step ' + (i+1) + ' of ' + STEPS.length + ': ' + st.short, pick(st.title), pick(st.desc), pickComms(st), pick(st.rules), pick(st.cites));
+  Array.from(nav.children).forEach((b, k) => {
+    b.setAttribute('aria-label', 'Step ' + (k+1) + ': ' + STEPS[k].short);
+    if (k === i) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
+    b.classList.toggle('done', k < i);
+  });
+  $('#btnPrev').disabled = i === 0 || estop;
+  $('#btnNext').disabled = i === STEPS.length - 1 || estop;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Flow control                                                       */
+/* ------------------------------------------------------------------ */
+async function go(i){
+  const my = ++run;
+  haltAll();
+  alarm.classList.remove('on');
+  cur = i;
+  const before = i === 0 ? STEPS[0].end() : STEPS[i-1].end();
+  Object.assign(S, before); render();
+  showStep(i);
+  setBubbles(pickBubbles(STEPS[i]));
+  const ok = () => my === run && !estop;
+  await STEPS[i].play(ok);
+  if (ok()){ Object.assign(S, STEPS[i].end()); render(); alarm.classList.remove('on'); }
+  return my;
+}
+function stopPlaying(){ playing = false; updatePlay(); }
+function updatePlay(){ $('#btnPlay').textContent = playing ? 'Pause' : (cur === STEPS.length - 1 ? 'Replay cycle' : 'Play cycle'); $('#btnPlay').disabled = estop; }
+async function playFrom(i){
+  playing = true; updatePlay();
+  for (let k = i; k < STEPS.length; k++){
+    const my = await go(k);
+    if (!playing || my !== run) return;
+    await sleep(reduceMotion ? 5000 : 3600);
+    if (!playing || my !== run) return;
+  }
+  playing = false; updatePlay();
+}
+$('#btnPlay').addEventListener('click', () => {
+  if (playing){ stopPlaying(); return; }
+  playFrom(cur === STEPS.length - 1 ? 0 : (cur === 0 && S.top === 0 ? 0 : cur + 1));
+});
+$('#btnNext').addEventListener('click', () => { stopPlaying(); if (cur < STEPS.length - 1) go(cur + 1).then(updatePlay); });
+$('#btnPrev').addEventListener('click', () => { stopPlaying(); if (cur > 0) go(cur - 1).then(updatePlay); });
+
+$('#btnStop').addEventListener('click', () => {
+  const btn = $('#btnStop');
+  if (!estop){
+    estop = true; playing = false; ++run; haltAll();
+    alarm.classList.remove('on'); honk(1, true);
+    $('#estopBanner').classList.add('on');
+    btn.textContent = 'All clear: resume'; btn.classList.add('resume');
+    fillPanel('Emergency: can happen at any step', ESTOP.title, ESTOP.desc, ESTOP.comms, ESTOP.rules, ESTOP.cites);
+    setBubbles(ESTOP.bubbles);
+    $('#btnPrev').disabled = true; $('#btnNext').disabled = true; updatePlay();
+  } else {
+    estop = false;
+    $('#estopBanner').classList.remove('on');
+    btn.textContent = 'All stop'; btn.classList.remove('resume');
+    go(cur).then(updatePlay); updatePlay();
+  }
+});
+
+$$('[data-scn]').forEach(b => b.addEventListener('click', () => {
+  if (estop) return;
+  scn = b.dataset.scn;
+  $$('[data-scn]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  const back = scn === 'backin';
+  $('#stageBack').style.display = back ? '' : 'none';
+  $('#stageBackLbl').style.display = back ? '' : 'none';
+  $('#stageDrive').style.display = back ? 'none' : '';
+  $('#stageDriveLbl').style.display = back ? 'none' : '';
+  spotter.style.display = back ? '' : 'none';
+  stopPlaying(); go(cur).then(updatePlay);
+}));
+$('#lyrSwing').addEventListener('change', e => { $('#swingLayer').style.display = e.target.checked ? '' : 'none'; });
+$('#lyrBlind').addEventListener('change', e => { $$('.blindLayer').forEach(g => g.style.display = e.target.checked ? '' : 'none'); });
+$('#lyrLabels').addEventListener('change', e => { $$('#site .lbl').forEach(g => g.style.display = e.target.checked ? '' : 'none'); });
+
+go(0).then(updatePlay);
+
+/* ------------------------------------------------------------------ */
+/*  Regulations                                                        */
+/* ------------------------------------------------------------------ */
+const R = (g, cite, title, req, check) => ({g, cite, title, req, check});
+const REGS = [
+ R('osha','29 CFR 1926.20(b)(2)','Competent-person inspections','Frequent and regular inspections of job sites, materials and equipment by competent persons designated by the employer.','Verify the employer has designated competent persons and that inspections occur. A written inspection record is useful evidence but is not created as a blanket requirement by this paragraph.'),
+ R('osha','29 CFR 1926.20(b)(4)','Qualified equipment operators','Only employees qualified by training or experience may operate equipment and machinery.','Verify equipment operators are qualified. This paragraph does not itself create a universal written-record requirement for every driver or spotter.'),
+ R('osha','29 CFR 1926.21(b)(2)','Hazard training','Each employee must be instructed in recognizing and avoiding the unsafe conditions of their work.','Verify workers understand relevant hazards and controls. Signed briefing records are recommended/site-required evidence, not an express requirement of this paragraph.'),
+ R('osha','29 CFR 1926.600(a)(3)','Lowered buckets, blocked equipment','Buckets, blades and dump bodies fully lowered or blocked when being repaired or not in use; controls in neutral with brakes set.','Idle excavator has its bucket on the ground; raised dump bodies are blocked during maintenance.'),
+ R('osha','29 CFR 1926.600(a)(6)','Overhead power lines','Equipment working or travelling near energized lines keeps minimum clearances (10 ft for lines rated 50 kV or less, more for higher voltage) unless lines are de-energized and visibly grounded.','Verify the applicable clearance is maintained. Showing lines/clearance limits on the site plan is a recommended project control.'),
+ R('osha','29 CFR 1926.601(b)(4)','Reversing motor vehicles','A vehicle with an obstructed rear view may not reverse unless it has a reverse alarm audible above surrounding noise, or an observer signals that it is safe.','Alarm tested at the loading position’s noise level; spotter assigned where the plan requires it.'),
+ R('osha','29 CFR 1926.601(b)(6)','Cab shield or canopy','Haulage vehicles loaded by power shovels, loaders or similar equipment need a cab shield and/or canopy that protects the operator from shifting or falling material.','Where this section applies, verify the required shield/canopy is present and serviceable. Moving the driver to a safe area is not a substitute for a vehicle-protection requirement that applies.'),
+ R('osha','29 CFR 1926.601(b)(14)','Start-of-shift vehicle check','Vehicles checked at the start of each shift (brakes, tires, horn, steering, seat belts, controls, safety devices). Defects corrected before use.','Verify the check occurred and unsafe defects were corrected. A written pre-shift form is recommended/site documentation, not expressly required by this paragraph.'),
+ R('osha','29 CFR 1926.602(a)(9)','Earthmoving equipment warnings','Bidirectional machines need an operative horn. Earthmoving equipment with an obstructed rear view may not be used in reverse unless it has a reverse alarm distinguishable from surrounding noise or an employee signals that it is safe to do so.','Horn works; for obstructed-rear-view earthmoving equipment, verify either the required reverse alarm or the permitted signaler alternative is actually in use.'),
+ R('osha','29 CFR 1926.651(b)','Underground utilities','Estimated utility locations must be determined before opening the excavation; utility owners must be contacted and exact locations determined safely as excavation approaches them. State one-call/811 law commonly supplies the ticketing process.','Verify utility-owner/one-call coordination and visible/current marks or other safe location evidence required by the applicable state/local one-call system; OSHA itself does not prescribe a universal "811 ticket" form.'),
+ R('osha','29 CFR 1926.651(d)','High-visibility garments','Employees exposed to public vehicular traffic wear warning vests or other high-visibility garments.','Verify employees exposed to public vehicular traffic are appropriately visible. A broader all-site hi-vis requirement may be imposed by the employer/project.'),
+ R('osha','29 CFR 1926.651(e)','Falling loads, vehicles being loaded','Nobody under loads handled by lifting or digging equipment. Employees stand away from vehicles being loaded. Drivers may stay in the cab only if it is protected per 1926.601(b)(6).','Verify people are clear of suspended/handled loads and the loading vehicle. This training adds a conservative site rule not to swing the bucket over the cab.'),
+ R('osha','29 CFR 1926.651(f)','Warning system near edges','When mobile equipment works next to or approaches an excavation edge without a clear view, a warning system is used: barricades, hand or mechanical signals, or stop logs.','Stop logs, berms or barricades along haul and reversing routes near edges.'),
+ R('osha','29 CFR 1926.651(j)(2)','2 ft setback','Materials and equipment kept at least 2 ft (0.61 m) from the edge of the excavation, or held back by retaining devices.','Spoil piles and parked equipment set back from the edge.'),
+ R('osha','29 CFR 1926.651(k)(1)','Excavation inspection','A competent person inspects the excavation, adjacent areas and protective systems daily before work and as needed, such as after rain.','Verify required inspections occur. A signed log is useful/site-required documentation but is not expressly required by this paragraph.'),
+ R('osha','29 CFR 1926.201(a); 1926.6(n)(1)','Flaggers and traffic control','OSHA requires flaggers/signaling and warning garments under §1926.201(a) to conform to the MUTCD provisions incorporated by reference in §1926.6. For roadway TTC design, also follow the current MUTCD edition adopted by the controlling highway agency/state and the approved TTC plan.','Verify the controlling roadway authority/TTC plan and applicable MUTCD edition; do not assume this training graphic replaces an engineered or agency-approved TTC plan.'),
+ R('msha','30 CFR 56.9100','Traffic rules','Rules covering speed, right-of-way, direction of movement, use of headlights and signaling are established and followed at each mine.','Written traffic rules and observed compliance.'),
+ R('msha','30 CFR 56.14100','Pre-operational examination','Self-propelled mobile equipment is inspected by the operator before use on each shift; safety defects are corrected promptly.','Verify the examination and defect-control process. Recordkeeping applies to safety defects not corrected immediately; do not treat this as a universal signed pre-op form requirement.'),
+ R('msha','30 CFR 56.14132','Horns and backup alarms','Horns and audible warning devices kept functional; equipment with an obstructed rear view has a backup alarm or uses an observer.','Test the horn and backup alarm.'),
+ R('msha','30 CFR 56.14200','Warning before moving','Operators give a warning audible above surrounding noise, or use other effective means, before starting or moving equipment.','Horn or radio warning observed before movement.'),
+ R('msha','30 CFR 56.9300 / 56.9301','Berms and dump-site restraints','Berms or guardrails on elevated roadway banks, at least mid-axle height of the largest equipment that usually uses the road; berms or bumper blocks at dump points with overtravel danger.','Berm height measured against the largest haul truck.'),
+ R('msha','30 CFR Part 46 / Part 48','Miner training','New-miner, new-task and annual refresher training. Part 46 covers sand, gravel and surface stone; Part 48 covers other mines.','Training plan and training certificates for each miner.'),
+ R('dot','49 CFR Parts 383 and 391','Driver licensing and qualification','CDL and driver-qualification/medical requirements apply to covered commercial motor vehicles and drivers, subject to vehicle class, operation and applicable exceptions.','For trucks entering public roads, determine whether the vehicle/driver is covered and verify the applicable CDL, qualification and medical-status requirements.'),
+ R('dot','49 CFR 396.11 / 396.13','Vehicle inspection / DVIR requirements','Drivers of covered CMVs must be satisfied the vehicle is in safe operating condition and comply with applicable inspection/reporting requirements. For property-carrying CMVs, a no-defect daily DVIR is not required by federal 396.11.','Verify the applicable pre-trip/DVIR process, defect reports and repair certification where required; a no-defect daily DVIR is not universally required for property-carrying CMVs.'),
+ R('dot','49 CFR 393.100','Cargo securement / containment','Covered commercial motor vehicles must be loaded and equipped so cargo is secured/contained against shifting, leaking, spilling, blowing or falling as required by the federal cargo-securement rules. Separate state load-cover/tarp laws may also apply.','Verify federal cargo securement for the load and any applicable state tarp/load-cover requirement. A designated load-check/tarp area is a site control, not a requirement stated by §393.100.'),
+ R('dot','23 CFR Part 658 and applicable state/local law','Vehicle size and weight','Federal Part 658 governs specified size/weight provisions on the Interstate System and designated National Network routes; state/local limits and permit rules govern other roads as applicable. Equipment manufacturer ratings remain separate limits.','Verify the actual route, axle/gross limits, permits, and equipment ratings before dispatch; scale tickets are evidence where the project/carrier uses them.'),
+ R('std','ANSI/ASSP A10.47','Highway work-zone safety','Covers internal traffic control plans that separate equipment and workers, plus backing and spotter practices.','An internal traffic control plan exists and is followed.'),
+ R('std','ANSI/ISEA 107','High-visibility apparel','Consensus performance standard for high-visibility apparel. In roadway TTC zones, the MUTCD requires Class 2 or 3 apparel (or equivalent revisions) for workers within the right-of-way; other construction areas follow the applicable OSHA exposure rule and employer/project PPE requirements.','Verify the garment class required by the controlling roadway/TTC rule or project PPE plan; do not infer that ANSI/ISEA 107 alone makes every worker on every construction site wear a particular class.'),
+ R('std','ISO 5006','Operator field of view','Test method and criteria for earth-moving machine visibility, identifying masked zones.','Mirrors and cameras supplied by the manufacturer are fitted and working.'),
+ R('std','ISO 9533','Travel alarms and horns','Performance/test requirements for machine-mounted audible travel alarms and warning horns when such devices are installed. The ISO standard itself does not determine which machines are legally required to have an alarm/horn.','Use OSHA, manufacturer instructions and the applicable machine rule to determine whether a device is required; where fitted/required, verify its performance and audibility.'),
+ R('std','ISO 16001','Object detection and visibility aids','Performance requirements for object detection systems such as radar and cameras.','Proximity systems working where fitted.'),
+ R('std','FHWA MUTCD Part 6','Temporary traffic control','Signs, devices and flagging where site access meets public roads.','Traffic control at the site entrance and exit.'),
+ R('std','Manufacturer operator’s manuals','Machine-specific instructions','Manufacturer instructions establish machine-specific operating limits, inspection points, capacities, visibility aids and prohibited practices.','Confirm the applicable manual/instructions are available to the operator in the manner required by the manufacturer/employer and that the operation follows them; do not assume every machine has a universal federal "manual in cab" rule.'),
+ R('intl','UK: CDM Regulations 2015, regs 27 and 28','Traffic routes and vehicles','Sites organised so pedestrians and vehicles move safely; vehicles used safely, including preventing them falling into excavations.','Segregated routes and signaller (banksman) arrangements.'),
+ R('intl','UK: HSE HSG144','Safe use of vehicles on construction sites','HSE practical guidance on site layout, reducing reversing, segregation and signallers. HSE currently notes that HSG144 is under review and contains outdated legislative references, so use it as guidance and verify current law separately.',''),
+ R('intl','Canada (Ontario): O. Reg. 213/91, ss. 104–106','Signallers','A signaller is required where the operator’s view is obstructed or a worker could be endangered; rules on signaller training and position.',''),
+ R('intl','Australia: model WHS Regulations','Mobile plant and traffic management','Safe Work Australia model provisions/guidance for powered mobile plant and traffic risk. These are model laws; the legally applicable requirements depend on the adopting state or territory.',''),
+ R('intl','EU: Directive 92/57/EEC; EN 474','Construction sites; earth-moving machinery','Minimum safety requirements for temporary or mobile sites; machine design requirements including visibility and warning devices.','')
+];
+const regList = $('#regList');
+function renderRegs(f){
+  regList.innerHTML = REGS.filter(r => f === 'all' || r.g === f).map(r =>
+    '<div class="reg"><div class="c">' + esc(r.cite) + '<small>' + esc(r.title) + '</small></div><div class="r">' + esc(r.req) + '</div>' +
+    (r.check ? '<div class="i">' + esc(r.check) + '</div>' : '<div class="i">Check the national text and site procedure.</div>') + '</div>').join('');
+}
+$$('#regFilters button').forEach(b => b.addEventListener('click', () => {
+  $$('#regFilters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  renderRegs(b.dataset.f);
+}));
+renderRegs('all');
+
+/* ------------------------------------------------------------------ */
+/*  Documentation                                                      */
+/* ------------------------------------------------------------------ */
+const DOCS = [
+ ['Traffic / internal traffic control plan: haul routes, staging, load positions, exclusion zones, speed limits, walkways','Supervisor / general contractor','Before work; update when the layout changes','Project/owner requirements; ANSI/ASSP A10.47; current MUTCD/agency TTC plan where public traffic is affected. Not a universal written-document mandate in 1926.20(b)'],
+ ['Job hazard analysis / pre-task hazard assessment for excavation and loading','Supervisor','Per company/project program; review when conditions change','Site/company safety program. 1926.21(b)(2) requires hazard instruction but does not by itself mandate a document titled JHA'],
+ ['Pre-task briefing / sign-in: signals, radio channel, call signs, spotter names','Foreman','Per site procedure; repeat when crew/conditions change','1926.21(b)(2) requires hazard instruction; the signed shift form is site documentation'],
+ ['Training and qualification records for operators, drivers and spotters','Employer','At hire; refresher per company policy','1926.20(b)(4); MSHA Part 46/48 at mines'],
+ ['Excavator pre-shift inspection checklist','Excavator operator','Every shift','Manufacturer; 1926.20(b)(2); MSHA 56.14100'],
+ ['Truck beginning-of-shift safety check; checklist if required by site','Truck driver','Beginning of each shift for covered vehicles','1926.601(b)(14) requires the check; the form itself is site documentation'],
+ ['Applicable CMV licensing, medical qualification, pre-trip/DVIR records','Motor carrier','As required for the covered vehicle/driver/operation','49 CFR Parts 383, 391 and 396; no-defect property-carrier DVIR is not universally required'],
+ ['Excavation inspection; written log if required by site','Competent person','Daily before work, as needed during shift, and after hazard-increasing events when exposure is anticipated','1926.651(k)(1) requires the inspection; the written log is site documentation'],
+ ['Utility-location / one-call evidence','Excavation contractor','Before digging; maintain as required by applicable one-call law','1926.651(b) requires utility coordination/location; ticket form/validity comes from state/local one-call law'],
+ ['Backing observer / spotter assignment where used','Supervisor','Per traffic plan and when conditions/crew change','1926.601(b)(4) and 1926.602(a)(9) allow an observer/signaller alternative in specified backing situations; assignment details are site procedure'],
+ ['Radio plan: channel, call signs, emergency call','Supervisor','Per project; confirm every shift','Site procedure'],
+ ['Equipment defect and repair records','Equipment manager','As defects are found','1926.601(b)(14); 49 CFR 396.11'],
+ ['Applicable manufacturer operating instructions/manual','Equipment owner','Available to operator as required by manufacturer/employer','Manufacturer; machine-specific requirement. Do not treat "manual in every cab" as a universal federal rule'],
+ ['Incident / near-miss reports; OSHA injury and illness records where recordable','Employer','As events occur','29 CFR 1904 applies to recordable injuries/illnesses; near-miss reporting is site/company policy']
+];
+const docState = store.get('tec_docs') || {};
+$('#docBody').innerHTML = DOCS.map((d, i) =>
+  '<tr><td><input type="checkbox" id="doc' + i + '" data-i="' + i + '"' + (docState[i] ? ' checked' : '') + ' aria-label="Confirmed: ' + esc(d[0]) + '"></td>' +
+  '<td class="dn"><label for="doc' + i + '">' + esc(d[0]) + '</label></td><td>' + esc(d[1]) + '</td><td>' + esc(d[2]) + '</td><td class="basis">' + esc(d[3]) + '</td></tr>').join('');
+function docProgress(){
+  const n = Object.values(docState).filter(Boolean).length;
+  $('#docCount').textContent = n + ' / ' + DOCS.length;
+  $('#docBar').style.width = (n / DOCS.length * 100) + '%';
+}
+$$('#docBody input').forEach(cb => cb.addEventListener('change', () => { docState[cb.dataset.i] = cb.checked; store.set('tec_docs', docState); docProgress(); }));
+docProgress();
+
+/* ------------------------------------------------------------------ */
+/*  Inspector checklist                                                */
+/* ------------------------------------------------------------------ */
+const AUDIT = [
+ ['Plan and layout', [
+   ['a1','Traffic management plan is on site and matches the actual layout'],
+   ['a2','Staging point marked outside the excavator swing radius'],
+   ['a3','Load position marked; reversing minimised (drive-through where space allows)'],
+   ['a4','Exclusion zone barricaded or coned where foot traffic is possible'],
+   ['a5','Spoil and parked equipment at least 2 ft from the excavation edge','1926.651(j)(2)'],
+   ['a6','Edge warning (stop logs, berm or barricade) where trucks approach an edge','1926.651(f)'],
+   ['a7','Overhead power lines identified and clearances marked','1926.600(a)(6)']]],
+ ['Equipment', [
+   ['b1','Where 1926.601(b)(6) applies, the haulage vehicle has the required cab shield/canopy; driver position during loading follows 1926.651(e) and the site plan','1926.601(b)(6)'],
+   ['b2','Reverse alarms audible above site noise at the loading position','1926.601(b)(4); 1926.602(a)(9)'],
+   ['b3','Horns work on both machines'],
+   ['b4','Mirrors and cameras clean and adjusted; lights and beacons working'],
+   ['b5','Beginning-of-shift vehicle safety check completed; defects affecting safe operation corrected before use; site checklist completed if required','1926.601(b)(14)']]],
+ ['Communication', [
+   ['c1','All units on the assigned radio channel; radio check done this shift'],
+   ['c2','Horn code and hand signals understood (ask two crew members to explain them)'],
+   ['c3','Trucks wait at staging until called in'],
+   ['c4','Instructions are read back before anyone moves'],
+   ['c5','Spotter visible to the driver, outside the truck path and swing radius, in hi-vis'],
+   ['c6','Driver stops when the spotter is out of sight']]],
+ ['Loading practice', [
+   ['d1','Bucket never passes over the truck cab or any person','1926.651(e)'],
+   ['d2','Nobody standing near the truck while it is loaded','1926.651(e)'],
+   ['d3','Truck parking brake set during loading'],
+   ['d4','Load placed evenly, within rated capacity, with no overhang'],
+   ['d5','Bucket grounded when the excavator is idle or unattended','1926.600(a)(3)'],
+   ['d6','Load checked and tarped outside the loading zone']]],
+ ['People and records', [
+   ['e1','Equipment operators qualified by training or experience; any records required by the employer or equipment-specific rule available','1926.20(b)(4)'],
+   ['e2','Employees exposed to public vehicular traffic wearing suitable warning/high-visibility garments; broader site PPE rule followed if applicable','1926.651(d)'],
+   ['e3','Hazard instruction/briefing completed; sign-in/documentation completed if required by site procedure','1926.21(b)(2)'],
+   ['e4','Daily excavation inspection completed by a competent person','1926.651(k)(1)']]]
+];
+const A = store.get('tec_audit') || {items:{}, meta:{}, notes:''};
+A.items = A.items || {}; A.meta = A.meta || {};
+const saveA = () => store.set('tec_audit', A);
+$('#auditGroups').innerHTML = AUDIT.map(g =>
+  '<div class="audit-group"><h3>' + esc(g[0]) + '</h3>' + g[1].map(it =>
+    '<div class="aitem"><div class="t">' + esc(it[1]) + (it[2] ? '<small>29 CFR ' + esc(it[2]) + '</small>' : '') + '</div>' +
+    '<div class="pf" role="group" aria-label="' + esc(it[1]) + '">' +
+    ['pass','fail','na'].map(v => '<button type="button" data-id="' + it[0] + '" data-v="' + v + '" aria-pressed="' + (A.items[it[0]] === v) + '">' + (v === 'na' ? 'N/A' : v[0].toUpperCase() + v.slice(1)) + '</button>').join('') +
+    '</div></div>').join('') + '</div>').join('');
+function auditScore(){
+  const all = AUDIT.flatMap(g => g[1]);
+  let p = 0, f = 0, n = 0;
+  all.forEach(it => { const v = A.items[it[0]]; if (v === 'pass') p++; else if (v === 'fail') f++; else if (v === 'na') n++; });
+  const open = all.length - p - f - n;
+  const pct = (p + f) ? Math.round(p / (p + f) * 100) + '%' : 'n/a';
+  $('#auditScore').innerHTML = '<span><b>' + p + '</b>pass</span><span><b>' + f + '</b>fail</span><span><b>' + n + '</b>N/A</span><span><b>' + open + '</b>not checked</span><span><b>' + pct + '</b>of checked items compliant</span>';
+  return {p, f, n, open, pct, all};
+}
+$$('#auditGroups .pf button').forEach(b => b.addEventListener('click', () => {
+  const id = b.dataset.id, v = b.dataset.v;
+  A.items[id] = A.items[id] === v ? undefined : v;
+  $$('#auditGroups .pf button[data-id="' + id + '"]').forEach(x => x.setAttribute('aria-pressed', String(A.items[id] === x.dataset.v)));
+  saveA(); auditScore();
+}));
+['insp','date','site','crew'].forEach(k => {
+  const el = $('#m_' + k);
+  if (A.meta[k]) el.value = A.meta[k];
+  el.addEventListener('input', () => { A.meta[k] = el.value; saveA(); });
+});
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+if (!A.meta.date){ $('#m_date').value = today(); }
+$('#auditNotes').value = A.notes || '';
+$('#auditNotes').addEventListener('input', e => { A.notes = e.target.value; saveA(); });
+auditScore();
+$('#btnSummary').addEventListener('click', () => {
+  const s = auditScore();
+  const lines = [];
+  lines.push('Truck–excavator loading inspection');
+  lines.push('Inspector: ' + ($('#m_insp').value || '—') + '   Date: ' + ($('#m_date').value || '—'));
+  lines.push('Site: ' + ($('#m_site').value || '—') + '   Observed: ' + ($('#m_crew').value || '—'));
+  lines.push('Result: ' + s.p + ' pass, ' + s.f + ' fail, ' + s.n + ' N/A, ' + s.open + ' not checked (' + s.pct + ' of checked items compliant)');
+  lines.push('');
+  const fails = [], open = [];
+  AUDIT.forEach(g => g[1].forEach(it => {
+    const v = A.items[it[0]];
+    const line = '- [' + g[0] + '] ' + it[1] + (it[2] ? ' (29 CFR ' + it[2] + ')' : '');
+    if (v === 'fail') fails.push(line); else if (!v) open.push(line);
+  }));
+  lines.push('Findings (failed items):'); lines.push(fails.length ? fails.join('\n') : '- None');
+  if (open.length){ lines.push(''); lines.push('Not checked:'); lines.push(open.join('\n')); }
+  lines.push(''); lines.push('Notes and corrective actions:'); lines.push($('#auditNotes').value || '—');
+  $('#summaryOut').value = lines.join('\n');
+  $('#summaryWrap').style.display = '';
+  $('#summaryOut').focus(); $('#summaryOut').select();
+});
+$('#btnReset').addEventListener('click', () => {
+  A.items = {}; A.notes = ''; A.meta = {}; saveA();
+  $$('#auditGroups .pf button').forEach(x => x.setAttribute('aria-pressed','false'));
+  ['insp','site','crew'].forEach(k => $('#m_' + k).value = '');
+  $('#m_date').value = today();
+  $('#auditNotes').value = ''; $('#summaryWrap').style.display = 'none';
+  auditScore();
+});
+
+/* ------------------------------------------------------------------ */
+/*  Quiz                                                               */
+/* ------------------------------------------------------------------ */
+const Q = [
+ ['The excavator is still digging when your truck arrives. Where do you wait?',
+  ['As close to the excavator as possible so loading is quick','At the marked staging point, outside the swing radius, until called in','Behind the excavator where the operator can see you','Anywhere on the haul road, as long as your hazard lights are on'],1,
+  'The excavator operator controls the loading area. Waiting at staging keeps the truck outside the swing radius until the operator has the bucket clear and calls you in.'],
+ ['Which route should the loaded bucket take to the truck?',
+  ['The shortest route, even if it passes over the cab','Over the rear or side of the bed, never over the cab','Over the cab, as long as the driver has been warned','Any route, as long as the bucket is kept high'],1,
+  '1926.651(e) prohibits anyone under loads handled by digging equipment. Swinging over the rear or side of the bed keeps the bucket and any spillage away from the driver.'],
+ ['Under 1926.651(e), when may the driver stay in the cab during loading?',
+  ['Always','Only when the cab has a cab shield or canopy meeting 1926.601(b)(6)','Only with more than five years of experience','Never'],1,
+  'Under 1926.651(e), an operator may remain in a cab that provides the protection required by 1926.601(b)(6). Where 1926.601(b)(6) applies, the required shield/canopy must be present; sending the driver to a safe area does not waive that vehicle-protection requirement. The site plan may still require the driver to wait in a designated safe area.'],
+ ['A haul truck with an obstructed rear view may reverse only when:',
+  ['The driver sounds the horn first','It has a reverse alarm audible above surrounding noise, or an observer signals it is safe','The excavator operator is watching','It is moving slower than 5 mph'],1,
+  'This is 1926.601(b)(4) for motor vehicles and 1926.602(a)(9)(ii) for earthmoving equipment. Many sites require both an alarm and a spotter in congested loading areas.'],
+ ['While reversing, you lose sight of the spotter in your mirror. What do you do?',
+  ['Keep going slowly; the spotter is probably still there','Stop immediately and wait until you see the spotter again or get a radio instruction','Sound the horn and continue','Speed up to finish the move quickly'],1,
+  'Lost contact means stop. The spotter may have moved away from a hazard, or may now be in your blind spot.'],
+ ['Using this module’s horn code, what do two short blasts from the excavator mean?',
+  ['Stop','Reverse','Go forward: load complete, clear to leave','Emergency, all stop'],2,
+  'One short means stop, two short means forward, three short means reverse, one long blast means all stop. Your site plan sets the official code, so confirm it at every briefing.'],
+ ['How far back from the edge of an excavation must spoil and equipment be kept?',
+  ['At least 6 inches','At least 2 ft (0.61 m), or held back by retaining devices','At least 10 ft in every case','There is no requirement'],1,
+  'This is 1926.651(j)(2). Heavy surcharge loads such as loaded haul trucks may need a greater setback, based on the competent person’s assessment of the soil and protective system.'],
+ ['Who can call an all stop?',
+  ['Only the supervisor','Only the excavator operator','Anyone who sees a hazard','Only the safety inspector'],2,
+  'This training adopts a site stop-work policy: any worker who sees an immediate hazard may call “All stop,” and movement remains stopped until the hazard is resolved. Do not cite this sentence as a universal federal OSHA stop-work-authority rule; crane signaling has its own specific stop/emergency-stop requirements.'],
+ ['An inspector sees the excavator operator leave the cab with the bucket raised. What is the issue?',
+  ['None, as long as the engine is off','Buckets must be fully lowered or blocked when not in use','The operator must leave the engine running','It is only a problem if a truck is parked nearby'],1,
+  '1926.600(a)(3)(i) requires specified suspended/raised equipment such as loader buckets, blades and dump bodies to be fully lowered or blocked when not in use, with controls neutral, motors stopped and brakes set unless the work requires otherwise. Paragraph (a)(3)(ii) is the separate parking-brake/wheel-chock provision.']
+];
+let qi = 0, qscore = 0, answered = false;
+const qbox = $('#quizBox');
+function renderQ(){
+  if (qi >= Q.length){
+    const pass = qscore >= Math.ceil(Q.length * 0.8);
+    qbox.innerHTML = '<div class="qtext">' + qscore + ' of ' + Q.length + ' correct</div><p>' +
+      (pass ? 'That meets the 80% mark this module uses. Record the result on the training sign-off sheet.' : 'Below the 80% mark this module uses. Step through the loading cycle again, then retake the check.') +
+      '</p><div class="qnav"><button class="btn primary" type="button" id="qRetake">Retake</button></div>';
+    $('#qRetake').addEventListener('click', () => { qi = 0; qscore = 0; renderQ(); });
+    return;
+  }
+  const q = Q[qi]; answered = false;
+  qbox.innerHTML = '<div class="qhead"><span>Question ' + (qi+1) + ' of ' + Q.length + '</span><span>Score ' + qscore + '</span></div>' +
+    '<div class="qtext">' + esc(q[0]) + '</div><div class="opts">' +
+    q[1].map((o, k) => '<button type="button" data-k="' + k + '">' + esc(o) + '</button>').join('') +
+    '</div><div class="explain" id="qExplain" role="status"></div><div class="qnav"><button class="btn primary" type="button" id="qNext" disabled>' + (qi === Q.length - 1 ? 'See result' : 'Next question') + '</button></div>';
+  qbox.querySelectorAll('.opts button').forEach(b => b.addEventListener('click', () => {
+    if (answered) return; answered = true;
+    const k = +b.dataset.k, right = k === q[2];
+    if (right) qscore++;
+    qbox.querySelectorAll('.opts button').forEach(x => { x.disabled = true; if (+x.dataset.k === q[2]) x.classList.add('right'); });
+    if (!right) b.classList.add('wrong');
+    const ex = $('#qExplain');
+    ex.innerHTML = '<b>' + (right ? 'Correct.' : 'Not quite.') + '</b> ' + esc(q[3]);
+    ex.classList.add('on');
+    $('#qNext').disabled = false; $('#qNext').focus();
+  }));
+  $('#qNext').addEventListener('click', () => { qi++; renderQ(); });
+}
+renderQ();
+})();
+</script>
+</body>
+</html>

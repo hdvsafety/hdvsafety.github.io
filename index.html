@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamic Safety &amp; Mobility Verification for Heavy-Duty Freight in Evolving Work Zones</title>
+<meta name="description" content="Safety21 project #656 — a Safety &amp; Mobility Verification Digital Twin (SMVDT) fusing smart-trailer telematics with live work-zone data to verify heavy-duty vehicle safety and mobility in evolving work zones.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Dynamic Safety &amp; Mobility Verification for Heavy-Duty Freight in Evolving Work Zones">
+<meta property="og:description" content="Safety21 (US DOT BIL) project #656 at Carnegie Mellon University — a digital twin that verifies whether a specific truck can safely navigate an evolving work zone.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23161d22'/%3E%3Cpath d='M-6 24 L8 -2 M2 24 L16 -2 M10 24 L24 -2 M18 24 L32 -2 M26 24 L40 -2' stroke='%23f0a640' stroke-width='5'/%3E%3Crect y='24' width='32' height='8' fill='%23f0a640'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-txt">
+        <b>SMVDT</b>
+        <span>Safety21 · #656</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">☰</button>
+    <nav class="nav" id="nav">
+      <a href="#problem">Problem</a>
+      <a href="#approach">Approach</a>
+      <a href="#testbeds">Testbeds</a>
+      <a href="#plan">Work plan</a>
+      <a href="#outputs">Outputs</a>
+      <a href="#prior-work">Prior work</a>
+      <a href="#team">Team</a>
+      <a class="cta" href="training/index.html">Training modules →</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" aria-label="Switch colour theme" title="Switch colour theme">◐</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ====================== HERO ====================== -->
+<section class="hero">
+  <div class="hero-in">
+    <div>
+      <p class="eyebrow">
+        <span class="tag">Project #656</span>
+        <span>US DOT BIL · Safety21 · 2023–2028</span>
+      </p>
+      <h1>Dynamic safety and mobility verification for <em>heavy-duty freight</em> in evolving work zones</h1>
+      <p class="hero-lede">
+        A Safety &amp; Mobility Verification Digital Twin that fuses smart-trailer telematics with
+        live work-zone data — so an agency can answer a question nobody can answer today:
+        <strong style="color:#fff">can <em>this</em> truck get through <em>this</em> work zone safely, right now?</strong>
+      </p>
+      <div class="hero-meta">
+        <div><span>Principal investigator</span><b>Pingbo Tang</b></div>
+        <div><span>Institution</span><b>Carnegie Mellon University</b></div>
+        <div><span>Grant cycle</span><b>Safety21 · 26–27</b></div>
+        <div><span>Status</span><b>Proposal under review</b></div>
+      </div>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="#approach">How the digital twin works</a>
+        <a class="btn btn-ghost" href="training/index.html">Explore the training modules</a>
+      </div>
+    </div>
+
+    <figure class="hero-fig">
+      <svg viewBox="0 0 580 360" role="img" aria-labelledby="archTitle archDesc">
+        <title id="archTitle">SMVDT system architecture</title>
+        <desc id="archDesc">Three input streams — smart-trailer and tractor telematics, work-zone and corridor geometry, and traffic, weather and incident feeds — flow into the Safety and Mobility Verification Digital Twin, which produces traffic-context-adaptive maps, a corridor safety dashboard, a rare-event scenario library and a communication risk detection interface.</desc>
+
+        <defs>
+          <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#f0a640"/>
+          </marker>
+          <linearGradient id="core" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f0a640"/>
+            <stop offset="1" stop-color="#d1851f"/>
+          </linearGradient>
+        </defs>
+
+        <!-- column labels -->
+        <text x="8"   y="20" fill="#8fa09a" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1.4">INPUTS</text>
+        <text x="214" y="20" fill="#8fa09a" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1.4">DIGITAL TWIN</text>
+        <text x="374" y="20" fill="#8fa09a" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1.4">DECISION SUPPORT</text>
+
+        <!-- inputs -->
+        <g font-family="Barlow, sans-serif" font-size="10.8" fill="#dde6e1">
+          <g>
+            <rect x="6" y="40" width="162" height="56" rx="9" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.2)"/>
+            <text x="18" y="60" font-size="12" font-weight="600" fill="#fff">Smart-trailer telematics</text>
+            <text x="18" y="76" fill="#a9b8b2">Braking · stability · lighting</text>
+            <text x="18" y="89" fill="#a9b8b2">Tractor–trailer angle · cameras</text>
+          </g>
+          <g>
+            <rect x="6" y="152" width="162" height="56" rx="9" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.2)"/>
+            <text x="18" y="172" font-size="12" font-weight="600" fill="#fff">Work-zone geometry</text>
+            <text x="18" y="188" fill="#a9b8b2">Barriers · lane widths · tapers</text>
+            <text x="18" y="201" fill="#a9b8b2">TTC plans · closure schedule</text>
+          </g>
+          <g>
+            <rect x="6" y="264" width="162" height="56" rx="9" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.2)"/>
+            <text x="18" y="284" font-size="12" font-weight="600" fill="#fff">Traffic · weather · TOC</text>
+            <text x="18" y="300" fill="#a9b8b2">Queues · speeds · incidents</text>
+            <text x="18" y="313" fill="#a9b8b2">Crew &amp; dispatcher comms</text>
+          </g>
+        </g>
+
+        <!-- arrows in -->
+        <g stroke="#f0a640" stroke-width="1.6" fill="none" marker-end="url(#arw)" opacity=".85">
+          <path d="M170 68  C 192 68, 192 150, 208 160"/>
+          <path d="M170 180 L 206 180"/>
+          <path d="M170 292 C 192 292, 192 210, 208 200"/>
+        </g>
+
+        <!-- core -->
+        <rect x="212" y="112" width="132" height="136" rx="14" fill="url(#core)"/>
+        <g font-family="Barlow Condensed, sans-serif" text-anchor="middle" fill="#1a1205">
+          <text x="278" y="142" font-size="19" font-weight="700">SMVDT</text>
+          <text x="278" y="160" font-size="11" font-weight="600" font-family="Barlow, sans-serif">Safety &amp; Mobility</text>
+          <text x="278" y="174" font-size="11" font-weight="600" font-family="Barlow, sans-serif">Verification Digital Twin</text>
+        </g>
+        <g font-family="Barlow, sans-serif" font-size="10" fill="#2b1d06" text-anchor="middle">
+          <rect x="222" y="186" width="112" height="19" rx="5" fill="rgba(255,255,255,.45)"/>
+          <text x="278" y="199">Physics-informed ML</text>
+          <rect x="222" y="209" width="112" height="19" rx="5" fill="rgba(255,255,255,.45)"/>
+          <text x="278" y="222">End-to-end safety metrics</text>
+        </g>
+
+        <!-- arrows out -->
+        <g stroke="#f0a640" stroke-width="1.6" fill="none" marker-end="url(#arw)" opacity=".85">
+          <path d="M346 150 C 362 150, 362 62, 372 58"/>
+          <path d="M346 170 C 364 170, 364 132, 372 128"/>
+          <path d="M346 192 C 364 192, 364 202, 372 206"/>
+          <path d="M346 212 C 362 212, 362 272, 372 276"/>
+        </g>
+
+        <!-- outputs -->
+        <g font-family="Barlow, sans-serif" font-size="10.8">
+          <g>
+            <rect x="374" y="38" width="200" height="42" rx="9" fill="rgba(240,166,64,.14)" stroke="rgba(240,166,64,.45)"/>
+            <text x="386" y="57" font-size="12" font-weight="600" fill="#f8c478">Traffic-context-adaptive maps</text>
+            <text x="386" y="72" fill="#a9b8b2">Safety · mobility · combined</text>
+          </g>
+          <g>
+            <rect x="374" y="108" width="200" height="42" rx="9" fill="rgba(240,166,64,.14)" stroke="rgba(240,166,64,.45)"/>
+            <text x="386" y="127" font-size="12" font-weight="600" fill="#f8c478">Corridor safety dashboard</text>
+            <text x="386" y="142" fill="#a9b8b2">CTPW · PennDOT deployment</text>
+          </g>
+          <g>
+            <rect x="374" y="186" width="200" height="42" rx="9" fill="rgba(240,166,64,.14)" stroke="rgba(240,166,64,.45)"/>
+            <text x="386" y="205" font-size="12" font-weight="600" fill="#f8c478">Rare-event scenario library</text>
+            <text x="386" y="220" fill="#a9b8b2">Validated at PennSTART</text>
+          </g>
+          <g>
+            <rect x="374" y="256" width="200" height="42" rx="9" fill="rgba(240,166,64,.14)" stroke="rgba(240,166,64,.45)"/>
+            <text x="386" y="275" font-size="12" font-weight="600" fill="#f8c478">Communication risk interface</text>
+            <text x="386" y="290" fill="#a9b8b2">Finds TOC ↔ crew reasoning gaps</text>
+          </g>
+        </g>
+      </svg>
+      <figcaption>Telematics and infrastructure data are fused into one twin, which scores the same road segment for both risk and delay — then pushes the result to the people who have to act on it.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ====================== PROBLEM ====================== -->
+<section class="section dark" id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">The problem</span>
+      <h2>Trucks, work zones, and three sets of people who can&rsquo;t see each other</h2>
+      <p class="sec-lede">
+        Commercial heavy-duty vehicles account for roughly one third of fatal work-zone crashes nationwide.
+        The risk is compounded by a coordination gap: planners, traffic operators and field crews each
+        hold a different piece of the picture, and the richest data of all sits locked inside the trucks.
+      </p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>1 in 3</b><span>fatal work-zone crashes nationwide involve a heavy-duty vehicle</span></div>
+      <div class="stat"><b>1,216</b><span>work-zone crashes in Pennsylvania</span><small>2023</small></div>
+      <div class="stat"><b>689</b><span>people injured in those crashes</span><small>2023</small></div>
+      <div class="stat"><b>22</b><span>people killed in those crashes</span><small>2023</small></div>
+    </div>
+
+    <div class="grid g3 mt-l">
+      <div class="card">
+        <h3>Planners look down the corridor</h3>
+        <p>Maintenance is prioritised from long-term corridor assessments, with little visibility into the
+        day-to-day difficulties that operators, field workers and drivers actually run into.</p>
+      </div>
+      <div class="card">
+        <h3>Operators look at the incident</h3>
+        <p>Traffic operators and work-zone managers lack the corridor perspective, so they respond to
+        incidents reactively instead of managing traffic to accommodate what the work zone needs next.</p>
+      </div>
+      <div class="card">
+        <h3>The trucks see everything — and tell nobody</h3>
+        <p>Telematics and vision data from smart tractors and trailers capture barrier placement, lane widths
+        and traffic disruption at close range, yet stay siloed from traffic management systems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== APPROACH ====================== -->
+<section class="section" id="approach">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">The approach</span>
+      <h2>From crash cleanup to physics-based risk verification</h2>
+      <p class="sec-lede">
+        The project deploys a <strong>Safety &amp; Mobility Verification Digital Twin (SMVDT)</strong>.
+        It fuses proprietary telematics from Clarience Technologies with real-time infrastructure feeds from
+        Cranberry Township Public Works — and potentially PennDOT — to quantify safety risks such as underride
+        exposure alongside mobility impacts such as delay, on the same road segments and in the same time windows.
+      </p>
+      <p class="sec-lede">
+        Crucially, the system does not only monitor current conditions. It <em>verifies</em> whether a specific
+        vehicle configuration can safely navigate an evolving work-zone geometry.
+      </p>
+    </div>
+
+    <div class="grid g3">
+      <article class="card pillar">
+        <span class="num" aria-hidden="true">1</span>
+        <h3>A library of evolving work-zone and HDV risk scenarios</h3>
+        <p>Collect operational data from Cranberry Township Public Works and define rigorous safety metrics
+        for the ways heavy vehicles actually get into trouble in a work zone.</p>
+        <ul class="metrics">
+          <li>Underride exposure</li>
+          <li>Blind-zone conflicts</li>
+          <li>Merge / queue risk</li>
+          <li>Stability anomalies</li>
+          <li>Intrusion probability</li>
+          <li>Barrier strike from off-tracking</li>
+        </ul>
+      </article>
+
+      <article class="card pillar">
+        <span class="num" aria-hidden="true">2</span>
+        <h3>A dual testbed for validation against reality</h3>
+        <p>Telematics and smart-trailer camera data are collected across two very different networks, then used
+        to validate physics-informed machine learning models against the rare-but-deadly cases that a purely
+        statistical model never sees.</p>
+        <ul class="ticks">
+          <li>CTPW municipal network — 140+ miles</li>
+          <li>Clarience instrumented route — 185 miles</li>
+          <li>Physical verification at the PennSTART test track</li>
+        </ul>
+      </article>
+
+      <article class="card pillar">
+        <span class="num" aria-hidden="true">3</span>
+        <h3>A communication risk detection interface</h3>
+        <p>Communication between the CTPW Transportation Operations Center and work-zone engineering and
+        management teams is collected and mapped against protocol, exposing <em>reasoning gaps</em> — places
+        where operational directives and safety standards quietly diverge.</p>
+        <ul class="ticks blue">
+          <li>Network level</li>
+          <li>Section level</li>
+          <li>Work-zone level</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="callout mt-l">
+      <h3>Two maps that finally share an axis</h3>
+      <p>
+        Safety is measured with trailer-to-vehicle clearance: minimum rear and side gaps, the rate of clearance
+        violations, and time below threshold. Mobility is measured with delay, queue length, throughput and speed
+        variation. Because both are computed on the same segments and time windows, the project can produce a
+        <strong>Safety Map</strong>, a <strong>Mobility Map</strong>, and a <strong>Combined Safety–Mobility
+        Map</strong> with simple scores that show whether a change reduces risk, delay, or both.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== TESTBEDS ====================== -->
+<section class="section alt" id="testbeds">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Where the work happens</span>
+      <h2>A dual testbed: one municipality, one commercial freight route</h2>
+      <p class="sec-lede">
+        Two networks with genuinely different traffic, geometry and governance — which is what makes the
+        validation meaningful rather than site-specific.
+      </p>
+    </div>
+
+    <div class="grid g2">
+      <div class="testbed">
+        <div class="big">140<small>+ miles</small></div>
+        <div>
+          <h3>Cranberry Township Public Works</h3>
+          <p class="note" style="margin-top:6px">Municipal network positioned at the junction of I-76, I-79,
+          US-19 and PA-228 — a dense interchange of interstate, US and state routes feeding local streets.</p>
+          <ul class="ticks">
+            <li>Live infrastructure and work-zone feeds</li>
+            <li>Transportation Operations Center communication data</li>
+            <li>Municipal corridor management deployment site</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="testbed">
+        <div class="big">185<small>miles</small></div>
+        <div>
+          <h3>Clarience Technologies instrumented route</h3>
+          <p class="note" style="margin-top:6px">A commercial testing route running through PennDOT
+          Regions&nbsp;2 and&nbsp;3, carrying production freight with instrumented tractors and trailers.</p>
+          <ul class="ticks">
+            <li>Braking, stability, steering and lighting events</li>
+            <li>Tractor–trailer articulation angles</li>
+            <li>Smart-trailer camera feeds</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-m" style="border-left:4px solid var(--blue)">
+      <h3>PennSTART</h3>
+      <p>Synthetic rare-event scenarios generated by the twin are physically validated at the PennSTART test
+      track, so the simulation is checked against real vehicle physics before anything is mapped back onto
+      live corridors.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== WORK PLAN ====================== -->
+<section class="section" id="plan">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Deployment plan</span>
+      <h2>Twelve months, four quarters, four deliverables</h2>
+    </div>
+
+    <div class="timeline">
+
+      <div class="tl-item">
+        <span class="tl-dot" aria-hidden="true">Q1</span>
+        <div class="tl-card">
+          <span class="tl-months">Months 1–3</span>
+          <h3>Digital infrastructure &amp; metric definition</h3>
+          <p><strong>Data ingestion &amp; fusion.</strong> Ingest historical and real-time telematics — braking,
+          stability, trailer camera feeds — from the Clarience 185-mile route, and map the geometry of the CTPW
+          140-mile network and PennDOT corridors such as Route 228, creating the twin&rsquo;s base layer.</p>
+          <p><strong>Metric formulation.</strong> Mathematically define the end-to-end safety metrics:
+          underride exposure, blind-zone conflicts, merge/queue risk, stability anomalies, intrusion probability
+          and barrier-strike risk from off-tracking.</p>
+          <p class="tl-deliv"><b>Deliverable</b>Initial SMVDT architecture specification and safety-metrics definition document.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <span class="tl-dot" aria-hidden="true">Q2</span>
+        <div class="tl-card">
+          <span class="tl-months">Months 4–6</span>
+          <h3>System integration &amp; simulation kickoff</h3>
+          <p><strong>SMVDT v1.</strong> Fuse the data layers into a twin that can overlay dynamic vehicle data
+          onto static work-zone maps and output traffic-context-adaptive maps.</p>
+          <p><strong>Rare-event generation.</strong> Use physics-informed machine learning to generate synthetic
+          edge cases — blind-side merges, nighttime barrier shadows — that are statistically rare but
+          operationally catastrophic.</p>
+          <p><strong>Cognitive analysis.</strong> Record exchanges between fleet dispatchers, TOC operators and
+          field crews, mine text from traffic management protocols, and identify where directives deviate from
+          safety standards.</p>
+          <p class="tl-deliv"><b>Deliverable</b>SMVDT v1 prototype and initial rare-event scenario bank.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <span class="tl-dot" aria-hidden="true">Q3</span>
+        <div class="tl-card">
+          <span class="tl-months">Months 7–9</span>
+          <h3>Validation &amp; stress testing</h3>
+          <p><strong>PennSTART verification.</strong> Physically validate the generated rare-event scenarios at
+          the test track so the simulation matches real-world vehicle physics.</p>
+          <p><strong>Simulation-to-road transfer.</strong> Map validated scenarios back onto real traces from the
+          Clarience route and the CTPW network to locate risk hotspots at network, section and work-zone levels.</p>
+          <p><strong>Interface development.</strong> Build the Communication Risk Detection Interface, with alerts
+          aligned to CTPW and PennDOT Temporary Traffic Control standards.</p>
+          <p class="tl-deliv"><b>Deliverable</b>Validated simulation library and draft Communication Risk Detection Interface.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <span class="tl-dot" aria-hidden="true">Q4</span>
+        <div class="tl-card">
+          <span class="tl-months">Months 10–12</span>
+          <h3>Deployment, handoff &amp; policy</h3>
+          <p><strong>Field deployment.</strong> Deploy the SMVDT and the Communication Risk Detection Interface
+          with CTPW for municipal corridor management and PennDOT for active work-zone monitoring.</p>
+          <p><strong>Public dataset release.</strong> Publish the anonymised Safety–Mobility Dataset to support
+          broader research into HDV safety.</p>
+          <p><strong>Policy handoff.</strong> Deliver a policy brief covering verification standards, routing
+          recommendations and procurement guidelines for verification-ready telematics.</p>
+          <p class="tl-deliv"><b>Deliverable</b>Live SMVDT dashboard, Communication Risk Detection Interface, final policy brief and public dataset.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="note mt-m"><strong>Strategic description / RD&amp;T:</strong> left open until USDOT&rsquo;s new
+    priorities and RD&amp;T strategic goals are available in Spring 2026.</p>
+  </div>
+</section>
+
+<!-- ====================== OUTPUTS ====================== -->
+<section class="section alt" id="outputs">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Outputs &amp; impacts</span>
+      <h2>What exists at the end of the year that does not exist now</h2>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="badge">Software</span>
+        <h3 style="margin-top:12px">Safety–Mobility Verification Digital Twin</h3>
+        <p>A system that fuses proprietary smart-trailer telematics with dynamic infrastructure data, powering a
+        Corridor Safety Dashboard deployed with Cranberry Township and PennDOT that generates
+        traffic-context-adaptive maps for commercial fleet routing.</p>
+      </div>
+      <div class="card">
+        <span class="badge">Software</span>
+        <h3 style="margin-top:12px">Communication Risk Detection Interface</h3>
+        <p>A tool that identifies reasoning gaps between Traffic Operations Centers and field crews, restructuring
+        safety alerts so they align with cognitive limits and agency standard operating procedures.</p>
+      </div>
+      <div class="card">
+        <span class="badge blue">Data</span>
+        <h3 style="margin-top:12px">Rare-Event Simulation Library</h3>
+        <p>A curated database of physics-informed edge cases — blind-side merges, barrier shadows — validated at
+        PennSTART rather than assumed.</p>
+      </div>
+      <div class="card">
+        <span class="badge blue">Data</span>
+        <h3 style="margin-top:12px">Public Safety–Mobility Dataset</h3>
+        <p>The region&rsquo;s first public safety–mobility dataset, anonymised and released to support open-source
+        algorithm development — and to let third-party navigation providers incorporate verified safety constraints.</p>
+      </div>
+      <div class="card">
+        <span class="badge go">Method</span>
+        <h3 style="margin-top:12px">End-to-End Safety Metrics Framework</h3>
+        <p>Novel algorithms quantifying underride exposure, stability anomalies and off-tracking barrier strikes,
+        supporting a new Open Verification Protocol for validating autonomous-ready freight systems.</p>
+      </div>
+      <div class="card">
+        <span class="badge go">Process</span>
+        <h3 style="margin-top:12px">Human–AI Communication Playbook &amp; policy brief</h3>
+        <p>A playbook that restructures safety alerts around how crews actually work, plus a policy brief for
+        statewide scaling of verification standards and procurement guidance.</p>
+      </div>
+    </div>
+
+    <h3 class="mt-l" style="margin-bottom:14px">Expected impacts</h3>
+    <div class="grid g3">
+      <div class="card">
+        <h4 style="margin-bottom:8px">Practice</h4>
+        <p>A repeatable verification protocol that moves agencies from reactive crash analysis to proactive risk
+        auditing, informing PennDOT and municipal policy on barrier placement, routing and procurement specs for
+        verification-ready telematics.</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:8px">Safety</h4>
+        <p>Measurable reductions in barrier-strike risk from off-tracking, queue-end collision exposure,
+        blind-side merge conflicts, intrusion and underride probability — with targets for reduced excessive
+        speeding (&gt;11&nbsp;mph over the limit) and surrogate conflict rates against pre-pilot baselines.</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:8px">Reliability</h4>
+        <p>A higher actionability rate for safety data: warnings mapped directly onto existing traffic management
+        and Temporary Traffic Control standards, reducing cognitive load and shortening median acknowledgment
+        times for municipal crews and drivers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== PRIOR WORK ====================== -->
+<section class="section" id="prior-work">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Prior work</span>
+      <h2>Interactive training &amp; simulation modules</h2>
+      <p class="sec-lede">
+        Before the twin, the same question had to be asked of people: who moves, when, and who said so.
+        These are browser-based, fully interactive training environments built around real work-zone and
+        construction scenarios, with decisions scored against OSHA, MUTCD, FMCSA and NIOSH source material.
+        They feed directly into the communication-risk strand of the Safety21 project.
+      </p>
+    </div>
+
+    <div class="grid g-mod">
+
+      <article class="card mod">
+        <div class="mod-top">
+          <svg viewBox="0 0 400 122" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <rect width="400" height="122" fill="#1f282e"/>
+            <path d="M0 96 H400" stroke="#394750" stroke-width="30"/>
+            <path d="M0 82 H400" stroke="#f3f4f1" stroke-width="2" stroke-dasharray="22 18" opacity=".5"/>
+            <g fill="#f0a640">
+              <path d="M300 92 l7 -20 h5 l7 20 z"/><path d="M256 94 l7 -21 h5 l7 21 z"/>
+              <path d="M212 96 l7 -22 h5 l7 22 z"/><path d="M168 98 l7 -23 h5 l7 23 z"/>
+              <path d="M124 100 l7 -24 h5 l7 24 z"/>
+            </g>
+            <g transform="translate(40,44)">
+              <rect x="0" y="12" width="46" height="26" rx="3" fill="#56c48f"/>
+              <rect x="46" y="18" width="22" height="20" rx="3" fill="#3da473"/>
+              <circle cx="12" cy="40" r="5" fill="#0c1114"/><circle cx="58" cy="40" r="5" fill="#0c1114"/>
+            </g>
+            <circle cx="336" cy="40" r="13" fill="#b42318"/>
+            <rect x="330" y="53" width="12" height="40" fill="#8f8f8f"/>
+          </svg>
+        </div>
+        <div class="mod-body">
+          <h3>Roadway work zone safety</h3>
+          <p>A 3D trainer for highway lane closures and flagging. Set the taper, hold a flagging station, handle a
+          driver who runs your stop, and keep the crew alive when the radio dies.</p>
+          <ul class="mod-tags">
+            <li>3D scenario engine</li><li>Lane closure</li><li>Flagging</li><li>MUTCD · OSHA cited</li>
+          </ul>
+          <a class="mod-go" href="training/roadway.html">Open module →</a>
+        </div>
+      </article>
+
+      <article class="card mod">
+        <div class="mod-top">
+          <svg viewBox="0 0 400 122" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <rect width="400" height="122" fill="#1f282e"/>
+            <path d="M0 104 H400" stroke="#394750" stroke-width="22"/>
+            <g stroke="#f0a640" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M92 96 V30"/><path d="M92 30 L300 30"/><path d="M92 46 L150 30"/>
+            </g>
+            <path d="M300 30 V62" stroke="#c9d4ce" stroke-width="2"/>
+            <rect x="282" y="62" width="36" height="16" rx="2" fill="#56c48f"/>
+            <rect x="74" y="84" width="36" height="14" rx="2" fill="#2d3a42"/>
+            <g>
+              <rect x="150" y="80" width="78" height="20" rx="3" fill="#7fb0ff" opacity=".85"/>
+              <circle cx="166" cy="102" r="5" fill="#0c1114"/><circle cx="212" cy="102" r="5" fill="#0c1114"/>
+            </g>
+          </svg>
+        </div>
+        <div class="mod-body">
+          <h3>Highway construction communication</h3>
+          <p>Girder delivery and excavator load-out, run as a radio discipline exercise. Two voices on one channel,
+          a walker in the swing path, and a driver who wants to stay in the cab.</p>
+          <ul class="mod-tags">
+            <li>3D scenario engine</li><li>Crane lifts</li><li>Excavator load-out</li><li>OSHA 1926 cited</li>
+          </ul>
+          <a class="mod-go" href="training/construction.html">Open module →</a>
+        </div>
+      </article>
+
+      <article class="card mod">
+        <div class="mod-top">
+          <svg viewBox="0 0 400 122" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <rect width="400" height="122" fill="#1f282e"/>
+            <g stroke="#394750" stroke-width="1">
+              <path d="M0 20 H400 M0 50 H400 M0 80 H400 M0 110 H400"/>
+              <path d="M40 0 V122 M110 0 V122 M180 0 V122 M250 0 V122 M320 0 V122"/>
+            </g>
+            <circle cx="180" cy="66" r="48" fill="none" stroke="#f0a640" stroke-width="2" stroke-dasharray="7 6"/>
+            <circle cx="180" cy="66" r="30" fill="none" stroke="#f0a640" stroke-width="1.4" opacity=".55"/>
+            <circle cx="180" cy="66" r="8" fill="#f0a640"/>
+            <rect x="252" y="40" width="54" height="22" rx="3" fill="#56c48f" opacity=".9"/>
+            <rect x="72" y="76" width="48" height="20" rx="3" fill="#7fb0ff" opacity=".8"/>
+            <path d="M180 66 L228 42" stroke="#f0a640" stroke-width="2.4"/>
+          </svg>
+        </div>
+        <div class="mod-body">
+          <h3>Crane siting exercise</h3>
+          <p>Drag the crane, the trailers and the loads around a scaled site plan. Watch radius, geometry flags,
+          production rate and cost move together — and compare mobile against tower at the same position.</p>
+          <ul class="mod-tags">
+            <li>Interactive site plan</li><li>Lift-by-lift costing</li><li>Mobile vs tower</li><li>Geometry flags</li>
+          </ul>
+          <a class="mod-go" href="training/crane-siting.html">Open module →</a>
+        </div>
+      </article>
+
+      <article class="card mod">
+        <div class="mod-top">
+          <svg viewBox="0 0 400 122" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <rect width="400" height="122" fill="#1f282e"/>
+            <path d="M0 100 H400" stroke="#394750" stroke-width="26"/>
+            <path d="M0 40 Q 120 28 200 44 T 400 34 L400 0 L0 0 Z" fill="#2b353c"/>
+            <circle cx="140" cy="64" r="46" fill="none" stroke="#ff8a7a" stroke-width="2" stroke-dasharray="8 7"/>
+            <g transform="translate(108,44)">
+              <rect x="0" y="14" width="40" height="22" rx="3" fill="#f0a640"/>
+              <path d="M38 20 L72 6" stroke="#f0a640" stroke-width="6" stroke-linecap="round"/>
+              <path d="M72 6 L82 26" stroke="#f0a640" stroke-width="5" stroke-linecap="round"/>
+              <path d="M78 26 l12 0 l-3 10 l-9 0 z" fill="#d1851f"/>
+            </g>
+            <g transform="translate(250,66)">
+              <rect x="0" y="6" width="58" height="22" rx="2" fill="#56c48f"/>
+              <rect x="58" y="12" width="20" height="16" rx="2" fill="#3da473"/>
+              <circle cx="14" cy="30" r="6" fill="#0c1114"/><circle cx="66" cy="30" r="6" fill="#0c1114"/>
+            </g>
+            <circle cx="214" cy="86" r="7" fill="#7fb0ff"/>
+          </svg>
+        </div>
+        <div class="mod-body">
+          <h3>Truck–excavator communication</h3>
+          <p>One full loading cycle, step by step: closed-loop radio calls, horn codes, spotter hand signals,
+          swing-radius exclusion, blind spots, the documentation that should exist on site, and a knowledge check.</p>
+          <ul class="mod-tags">
+            <li>Animated plan view</li><li>Radio &amp; signal protocol</li><li>Inspector checklist</li><li>Knowledge check</li>
+          </ul>
+          <a class="mod-go" href="training/truck-excavator.html">Open module →</a>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="center mt-l">
+      <a class="btn btn-dark" href="training/index.html">All training modules →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== RESEARCH GAP ====================== -->
+<section class="section dark">
+  <div class="wrap narrow">
+    <span class="sec-kicker">Where this sits in the literature</span>
+    <h2>The gap this closes</h2>
+    <p class="sec-lede mt-m">
+      A review of TRID shows strong existing work on work-zone operations (queue warning, late-merge control),
+      truck safety technology (camera and alert systems, leader–follower truck-mounted attenuators, platooning)
+      and simulation tools. But most studies analyse safety and traffic delay separately, are limited to a single
+      device or site, or do not use real heavy-truck and smart-trailer data.
+    </p>
+    <p class="sec-lede">
+      This project closes that gap at the <strong style="color:#fff">corridor level</strong>: tractor and trailer
+      telematics are fused with work-zone layout, lane status, traffic state and weather so that safety and
+      mobility are computed on the same road segments and time windows — producing a practical, deployment-ready
+      corridor tool that agencies, fleets and drivers can use to select routes, set work-zone plans, and
+      demonstrate measurable improvement.
+    </p>
+  </div>
+</section>
+
+<!-- ====================== TEAM ====================== -->
+<section class="section alt" id="team">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Team</span>
+      <h2>Who is doing the work</h2>
+    </div>
+
+    <div class="people">
+      <div class="person lead">
+        <span class="avatar" aria-hidden="true">PT</span>
+        <div>
+          <b>Pingbo Tang</b>
+          <span>Carnegie Mellon School of Engineering · Faculty, tenured</span>
+          <span class="role">Principal investigator</span>
+        </div>
+      </div>
+      <div class="person lead">
+        <span class="avatar" aria-hidden="true">PZ</span>
+        <div>
+          <b>Peter (Yun) Zhang</b>
+          <span>Carnegie Mellon Heinz College · Faculty, tenure track</span>
+          <span class="role">Co-principal investigator</span>
+        </div>
+      </div>
+      <div class="person">
+        <span class="avatar" aria-hidden="true">AJ</span>
+        <div>
+          <b>Ava Jahan Biglari</b>
+          <span>Carnegie Mellon School of Engineering</span>
+          <span class="role">PhD student</span>
+        </div>
+      </div>
+      <div class="person">
+        <span class="avatar" aria-hidden="true">SV</span>
+        <div>
+          <b>Samantha Vu</b>
+          <span>Carnegie Mellon School of Engineering</span>
+          <span class="role">Undergraduate student</span>
+        </div>
+      </div>
+      <div class="person">
+        <span class="avatar" aria-hidden="true">MB</span>
+        <div>
+          <b>Michael Boydos</b>
+          <span>Carnegie Mellon University</span>
+          <span class="role">Business manager</span>
+        </div>
+      </div>
+      <div class="person">
+        <span class="avatar" aria-hidden="true">MT</span>
+        <div>
+          <b>Mei Tao</b>
+          <span>Carnegie Mellon University</span>
+          <span class="role">Business manager</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== PARTNERS ====================== -->
+<section class="section" id="partners">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-kicker">Partners &amp; support</span>
+      <h2>Deployment partners</h2>
+      <p class="sec-lede">The testbeds, the trucks and the work zones are real, and they belong to these organisations.</p>
+    </div>
+
+    <div class="partners">
+      <div class="partner"><b>Clarience Technologies, LLC</b><span>Deployment partner</span></div>
+      <div class="partner"><b>Cranberry Township Public Works</b><span>Deployment partner</span></div>
+      <div class="partner"><b>Safety Emissions Solutions, LLC</b><span>Deployment partner</span></div>
+      <div class="partner"><b>PITT OHIO</b><span>Deployment partner</span></div>
+      <div class="partner"><b>Regional Development Corporation (RIDC)</b><span>Deployment partner</span></div>
+      <div class="partner"><b>Constructors Association of Western PA</b><span>Partner</span></div>
+    </div>
+
+    <h3 class="mt-l" style="margin-bottom:14px">In-kind contributors</h3>
+    <p class="sec-lede" style="margin-top:0;max-width:72ch">
+      Clarience Technologies, Safety Emissions Solutions and Cranberry Township Public Works contribute
+      in-kind support — instrumented vehicles, route access, operational data and staff time — alongside the
+      deployment sites themselves.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4>The project</h4>
+        <p>Dynamic Safety and Mobility Verification for Heavy-Duty Freight in Evolving Work Zones.<br>
+        Safety21 project&nbsp;#656 · US DOT BIL, 2023–2028 · Grant cycle 26–27 · Research, applied.</p>
+      </div>
+      <div>
+        <h4>On this site</h4>
+        <ul>
+          <li><a href="#problem">The problem</a></li>
+          <li><a href="#approach">The approach</a></li>
+          <li><a href="#testbeds">Testbeds</a></li>
+          <li><a href="#plan">Work plan</a></li>
+          <li><a href="#outputs">Outputs &amp; impacts</a></li>
+          <li><a href="#team">Team</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Training modules</h4>
+        <ul>
+          <li><a href="training/index.html">Module index</a></li>
+          <li><a href="training/roadway.html">Roadway work zone safety</a></li>
+          <li><a href="training/construction.html">Highway construction communication</a></li>
+          <li><a href="training/crane-siting.html">Crane siting exercise</a></li>
+          <li><a href="training/truck-excavator.html">Truck–excavator communication</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Record</h4>
+        <ul>
+          <li><a href="https://ppms.cit.cmu.edu/projects/detail/656" rel="noopener">Safety21 project record #656</a><br>
+            <span style="font-size:12.5px">(CMU PPMS — sign-in required)</span></li>
+          <li><a href="https://www.cmu.edu/cee/" rel="noopener">CMU Civil &amp; Environmental Engineering</a></li>
+          <li><a href="https://www.heinz.cmu.edu/" rel="noopener">CMU Heinz College</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>Carnegie Mellon University · Safety21 National University Transportation Center</span>
+      <span>Status: proposal under review</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>
