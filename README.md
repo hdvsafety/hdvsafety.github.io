@@ -1,7 +1,7 @@
 # Dynamic Safety &amp; Mobility Verification for Heavy-Duty Freight in Evolving Work Zones
 
-Project website for **Safety21 project #656** — US DOT BIL · Safety21 National University Transportation
-Center · grant cycle 26–27 · research, applied — at Carnegie Mellon University.
+
+Project website for a **US DOT** applied research project at Carnegie Mellon University.
 
 **Principal investigator:** Pingbo Tang (CMU School of Engineering)
 **Co-principal investigator:** Peter (Yun) Zhang (CMU Heinz College)
