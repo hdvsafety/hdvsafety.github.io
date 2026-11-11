@@ -2,3 +2,6 @@ Thumbs.db
 .DS_Store
 desktop.ini
 *.tmp
+
+# Training modules: kept on disk, not part of the Safety21 project site
+training/
