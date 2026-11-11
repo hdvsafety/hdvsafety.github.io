@@ -44,12 +44,26 @@ commercial fleets and for the agencies that manage the corridors they run on.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | The project site — problem, approach, safety metrics, testbeds, work plan, outputs, team, partners |
+| `index.html` | The project site — problem, approach, system, safety metrics, testbeds, work plan, outputs, team, partners |
 | `assets/css/site.css` | Stylesheet, including light and dark themes |
-| `assets/js/site.js` | Theme toggle and mobile navigation |
+| `assets/js/site.js` | Theme toggle, mobile nav, scroll reveal, scrollspy, reading progress, back-to-top |
+| `assets/img/` | Optional images (see below) |
 
 No build step, no framework, no dependencies to install. The architecture diagram is inline SVG; the only
-external request is to Google Fonts.
+external request is to Google Fonts (Source Serif 4, Inter, IBM Plex Mono).
+
+### Adding the lab logo
+
+Drop a square logo at **`assets/img/logo.png`** and it appears automatically in two places: the header
+wordmark and the hero badge. The page probes for the file at runtime and only swaps it in once it has
+actually loaded, so a missing file simply leaves the `HDV` text mark in place — nothing breaks.
+
+### A note on the scroll animations
+
+Sections fade in as you reach them. The hiding is applied only after a small inline script in `<head>`
+confirms scripting is available, and that script removes the class again if `site.js` has not reported in
+within 2.5 seconds. So if the script is blocked, fails or is disabled, the whole page renders as plain
+static content rather than going blank. `prefers-reduced-motion` disables the animation entirely.
 
 ## Running it locally
 
