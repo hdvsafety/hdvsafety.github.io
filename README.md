@@ -4,7 +4,7 @@
 Project website for a **US DOT** applied research project at Carnegie Mellon University.
 
 **Principal investigator:** Pingbo Tang (CMU School of Engineering)
-**Co-principal investigator:** Peter (Yun) Zhang (CMU Heinz College)
+**Co-principal investigator:** Peter Zhang (CMU Heinz College)
 
 ---
 
