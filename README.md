@@ -5,7 +5,6 @@ Center, 2023–2028 · grant cycle 26–27 · research, applied — at Carnegie 
 
 **Principal investigator:** Pingbo Tang (CMU School of Engineering)
 **Co-principal investigator:** Peter (Yun) Zhang (CMU Heinz College)
-**Status:** proposal under review
 
 ---
 
