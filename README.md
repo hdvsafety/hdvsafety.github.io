@@ -82,6 +82,20 @@ Then visit <http://localhost:8000>.
 
 `.nojekyll` is present so GitHub Pages serves every file as-is rather than running it through Jekyll.
 
+### The site is currently unlisted
+
+`index.html` carries `<meta name="robots" content="noindex, nofollow">`, so search engines will not list
+the page. **This is not privacy** — anyone with the link can open the site, and a public repository's files
+and history are readable by anyone. It only keeps the project from turning up in a search while the
+proposal is pending.
+
+To publish properly, delete those two meta tags and push. Google usually drops a de-listed page within days
+of recrawling it.
+
+Do **not** add a `Disallow` rule to `robots.txt` as well: that blocks crawlers from fetching the page at
+all, so they never see the `noindex` tag, and the bare URL can still end up in results. The meta tag on its
+own is the right tool.
+
 ## Project record
 
 The authoritative project record lives in CMU's Project Proposal Management System at
